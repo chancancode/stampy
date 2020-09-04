@@ -9,6 +9,10 @@ export default class ApplicationRoute extends Route {
       gapi.load('client:auth2', resolve)
     });
 
+    await new Promise(resolve => {
+      gapi.load('picker', resolve);
+    });
+
     await gapi.client.init({
       apiKey: config.GOOGLE_API_KEY,
       clientId: config.GOOGLE_CLIENT_ID,

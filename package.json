@@ -35,6 +35,7 @@
     "@types/gapi.auth2": "^0.0.52",
     "@types/gapi.client.drive": "^3.0.9",
     "@types/gapi.client.sheets": "^4.0.11",
+    "@types/google.picker": "^0.0.34",
     "@types/qunit": "^2.9.1",
     "@types/rsvp": "^4.0.3",
     "babel-eslint": "^10.1.0",
