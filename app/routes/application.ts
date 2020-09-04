@@ -16,7 +16,14 @@ export default class ApplicationRoute extends Route {
         'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
         'https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest'
       ],
-      scope: 'email profile https://www.googleapis.com/auth/drive.file'
+      scope: [
+        'email',
+        'profile',
+        'https://www.googleapis.com/auth/drive.file',
+        'https://www.googleapis.com/auth/drive.install'
+        // 'https://www.googleapis.com/auth/drive.metadata.readonly',
+        // 'https://www.googleapis.com/auth/spreadsheets.readonly'
+      ].join(' ')
     });
   }
 }

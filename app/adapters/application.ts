@@ -158,7 +158,7 @@ export default class ApplicationAdapter extends Adapter {
   }
 
   private buildQuery(query?: string): string {
-    let q = "mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false";
+    let q = "appProperties has { key='-type' and value='stamp-card' } and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false";
 
     if (query) {
       q = `${q} and (${query})`;
