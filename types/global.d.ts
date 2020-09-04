@@ -4,3 +4,7 @@ declare module 'stamps/templates/*' {
   const tmpl: TemplateFactory;
   export default tmpl;
 }
+
+interface Window {
+  scripts: Record<string, Promise<Event>>;
+}

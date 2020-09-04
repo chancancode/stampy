@@ -7,4 +7,11 @@ export default class Router extends EmberRouter {
 }
 
 Router.map(function() {
+  this.route('signin');
+  this.route('authenticated', { path: '' }, function() {
+    this.route('redeem', { resetNamespace: true });
+    this.route('collect', { resetNamespace: true });
+    this.route('give', { resetNamespace: true });
+    this.route('account', { resetNamespace: true });
+  });
 });

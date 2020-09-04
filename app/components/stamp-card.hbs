@@ -1,0 +1,35 @@
+<article
+  class="stamp-card"
+  style="background: {{{@card.backgroundColor}}}; color: {{{@card.foregroundColor}}}"
+>
+  <h1>{{@card.title}}</h1>
+  <h2>{{@card.description}}</h2>
+  <p class="stamps">
+    <ol>
+      {{#each @card.slots as |slot|}}
+        {{#if slot}}
+          <li class="filled">
+            <Icon
+              @name="collect"
+              fill={{@card.foregroundColor}}
+              alt="{{format-date slot.date}} {{slot.notes}}"
+            />
+          </li>
+        {{else}}
+          <li />
+        {{/if}}
+      {{/each}}
+    </ol>
+  </p>
+  <p class="terms">
+    <h3>Terms and Conditions:</h3>
+    <ul>
+      {{#if @card.expirationDate}}
+        <li>Expires {{format-date @card.expirationDate}}.</li>
+      {{/if}}
+      {{#each @card.terms as |term|}}
+        <li>{{term}}</li>
+      {{/each}}
+    </ul>
+  </p>
+</article>
