@@ -16,7 +16,19 @@ Ember.onerror = (error: unknown) => {
   if (typeof error === 'string') {
     details = error;
   } else if (isError(error)) {
-    details = error.stack || `${error.name}: ${error.message}`;
+    details = error.name || 'Error';
+
+    if (error.message) {
+      details = `${details}: ${error.message}`;
+    }
+
+    if (error.stack) {
+      if (error.stack.startsWith(`${details}`)) {
+        details = error.stack;
+      } else {
+        details = `${details}\n${error.stack}`;
+      }
+    }
   } else if (isResponse(error)) {
     let status = '';
 
@@ -51,6 +63,8 @@ Ember.onerror = (error: unknown) => {
     errorModal.classList.remove('hide');
     errorModal.classList.add('show');
   }
+
+  console.error(error);
 };
 
 function isPartial<T extends {}>(error: unknown): error is Partial<T> {

@@ -6,6 +6,7 @@ import { assert } from '@ember/debug';
 import { inject as service } from '@ember/service';
 import RSVP from 'rsvp';
 
+import { SPREADSHEET_Q } from 'stampy/adapters/application';
 import SessionService from 'stampy/services/session';
 
 export interface Link {
@@ -163,7 +164,7 @@ export default class UserAdapter extends Adapter {
       fields: 'nextPageToken, files(id, ownedByMe, appProperties)',
       pageSize: 1000,
       pageToken,
-      q: "mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false"
+      q: SPREADSHEET_Q
     });
 
     let files = result.files || [];

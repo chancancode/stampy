@@ -14,6 +14,7 @@ declare const config: {
   locationType: string;
   rootURL: string;
 
+  GOOGLE_APP_ID: string;
   GOOGLE_API_KEY: string;
   GOOGLE_CLIENT_ID: string;
 };

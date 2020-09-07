@@ -11,8 +11,8 @@ type Permission = gapi.client.drive.Permission;
 type User = gapi.client.drive.User;
 type Spreadsheet = gapi.client.sheets.Spreadsheet;
 
-const SPREADSHEET_Q = "appProperties has { key='model' and value='true' } and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false";
-const FOLDER_Q = "appProperties has { key='root' and value='true' } and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
+export const SPREADSHEET_Q = "appProperties has { key='model' and value='true' } and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false";
+export const FOLDER_Q = "appProperties has { key='root' and value='true' } and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
 
 export type RecordFile = {
   id: string;
@@ -153,10 +153,12 @@ export default class ApplicationAdapter extends Adapter {
     if (snapshot.adapterOptions) {
       let { emailAddress, emailMessage, sendNotificationEmail } = snapshot.adapterOptions as SharingOptions;
 
-      if (emailMessage) {
-        emailMessage = `${emailMessage} ${description}`;
-      } else {
-        emailMessage = description;
+      if (sendNotificationEmail) {
+        if (emailMessage) {
+          emailMessage = `${emailMessage} ${description}`;
+        } else {
+          emailMessage = description;
+        }
       }
 
       await gapi.client.drive.permissions.create({

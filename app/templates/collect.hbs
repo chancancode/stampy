@@ -1,3 +1,14 @@
 {{#each @model as |card|}}
   <StampCard @card={{card}} />
 {{/each}}
+
+<LinkTo @route="import" class="placeholder-card import-link">
+  <h2>Missing Something?</h2>
+  <span>
+    Stampy needs your permission to access files on Google Drive,
+    which is where your cards are stored. Click here to select
+    additional cards in order to track their progress in the
+    Stampy app.
+  </span>
+  <Icon @name="import" />
+</LinkTo>
