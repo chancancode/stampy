@@ -19,8 +19,7 @@ export default class ApplicationRoute extends Route {
       scope: [
         'email',
         'profile',
-        'https://www.googleapis.com/auth/drive.file',
-        'https://www.googleapis.com/auth/drive.apps.readonly'
+        'https://www.googleapis.com/auth/drive.file'
       ].join(' ')
     });
   }
