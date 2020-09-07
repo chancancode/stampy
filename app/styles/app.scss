@@ -190,7 +190,7 @@ main {
   }
 }
 
-.signin-modal {
+.full-page-modal {
   position: absolute;
   z-index: 1;
   width: 100%;
@@ -237,18 +237,30 @@ main {
     align-self: start;
   }
 
+  &:after {
+    display: block;
+    content: '';
+    margin-top: 25px;
+    z-index: -1;
+    background-color: rgba(255,255,255,0.8);
+    grid-row: 6/11;
+    grid-column: 1/4;
+  }
+}
+
+.signin-modal {
   .google-signin {
     margin-top: 50px;
     grid-row: 6;
     align-self: end;
   }
+}
 
-  &:after {
-    display: block;
-    content: '';
-    margin-top: 25px;
-    background-color: rgba(255,255,255,0.8);
-    grid-row: 6/11;
-    grid-column: 1/4;
+.error-modal {
+  pre {
+    margin-top: 50px;
+    grid-row: 6;
+    align-self: end;
+    color: rgba(0,0,0,0.8);
   }
 }
