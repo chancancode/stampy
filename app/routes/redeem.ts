@@ -1,13 +1,14 @@
 import Route from '@ember/routing/route';
 
-export default class CollectRoute extends Route {
+export default class RedeemRoute extends Route {
   async beforeModel(): Promise<unknown> {
     let auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
-    let config = require('stamps/config/environment').default;
+    let config = require('stampy/config/environment').default;
     let view = new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS);
     view.setMode(google.picker.DocsViewMode.LIST);
     view.setOwnedByMe(false);
-    view.setParent('1YK5K1yPNWXrMFPsnSwC6UpHGGdQ8aQhD');
+    view.setQuery('Stampy');
+    // view.setParent('1YK5K1yPNWXrMFPsnSwC6UpHGGdQ8aQhD');
     // view.setParent('15FbUI0vmSFI3uqZdlHknuBEWv0v_nxL0PXl9PGo1S3U');
     let builder = new google.picker.PickerBuilder();
     builder.setAppId('394800014115');

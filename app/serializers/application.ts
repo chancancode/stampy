@@ -9,6 +9,10 @@ import DS from 'ember-data';
 import { getOwner } from '@ember/application';
 import { assert } from '@ember/debug';
 import { get } from '@ember/object';
+import { inject as service } from '@ember/service';
+
+import SessionService from 'stampy/services/session';
+import { AdapterRecord as AdapterRecord } from 'stampy/adapters/application';
 
 type Spreadsheet = gapi.client.sheets.Spreadsheet;
 type Properties = gapi.client.sheets.SpreadsheetProperties;
@@ -30,24 +34,40 @@ export interface SerializeOptions {
   mode: 'create' | 'update';
 }
 
+interface Link {
+  type: keyof ModelRegistry;
+  id: string;
+}
+
+interface User {
+  name: string;
+  email: string;
+  picture?: string;
+}
+
 interface NormalizedRecord {
   id: string;
   type: string;
   attributes: Record<string, unknown>;
+  relationships?: Record<string, {
+    data: Link
+  }>;
 }
 
-export default class SpreadsheetSerializer extends Serializer {
+export default class ApplicationSerializer extends Serializer {
+  @service session!: SessionService;
+
   normalizeResponse(
     store: Store,
     primaryModelClass: Model,
-    payload: Spreadsheet,
+    payload: AdapterRecord,
     id: string,
     requestType: string
   ): { data: NormalizedRecord };
   normalizeResponse(
     store: Store,
     primaryModelClass: Model,
-    payload: Spreadsheet[],
+    payload: AdapterRecord[],
     id: string,
     requestType: string
   ): { data: NormalizedRecord[] };
@@ -61,14 +81,18 @@ export default class SpreadsheetSerializer extends Serializer {
   normalizeResponse(
     store: Store,
     _primaryModelClass: Model,
-    payload: Spreadsheet | Spreadsheet[] | undefined,
+    payload: AdapterRecord | AdapterRecord[] | undefined,
     _id: string,
     _requestType: string
-  ): { data: NormalizedRecord | NormalizedRecord[] } {
+  ): { data: NormalizedRecord | NormalizedRecord[], included?: NormalizedRecord[] } {
     if (Array.isArray(payload)) {
-      return { data: payload.map(p => this.normalizeRecord(store, p)) };
+      let data = payload.map(p => this.normalizeRecord(store, p));
+      let included = this.extractIncluded(payload);
+      return { data, included };
     } else if (payload) {
-      return { data: this.normalizeRecord(store, payload) };
+      let data = this.normalizeRecord(store, payload);
+      let included = this.extractIncluded([payload]);
+      return { data, included };
     } else {
       return { data: [] };
     }
@@ -93,17 +117,17 @@ export default class SpreadsheetSerializer extends Serializer {
     }
   }
 
-  private normalizeRecord(store: Store, payload: Spreadsheet): NormalizedRecord {
-    assert('id missing from payload', payload.spreadsheetId);
+  private normalizeRecord(store: Store, { file, spreadsheet }: AdapterRecord): NormalizedRecord {
+    assert('id missing from payload', spreadsheet.spreadsheetId);
 
-    let id = payload.spreadsheetId;
+    let id = spreadsheet.spreadsheetId;
 
-    assert('developerMetadata missing from payload', payload.developerMetadata);
+    assert('developerMetadata missing from payload', spreadsheet.developerMetadata);
 
     let type: keyof ModelRegistry | undefined;
     let attributes: Record<string, unknown> = Object.create(null);
 
-    for (let metadata of payload.developerMetadata) {
+    for (let metadata of spreadsheet.developerMetadata) {
       let { location, visibility, metadataKey, metadataValue } = metadata;
 
       if (location?.locationType !== 'SPREADSHEET' || visibility !== 'PROJECT') {
@@ -131,7 +155,7 @@ export default class SpreadsheetSerializer extends Serializer {
       }
     }
 
-    attributes['spreadsheet'] = payload;
+    attributes['spreadsheet'] = spreadsheet;
 
     assert('-type key missing in metadata', type);
 
@@ -140,13 +164,97 @@ export default class SpreadsheetSerializer extends Serializer {
 
     model.eachTransformedAttribute((name, type) => {
       if (type === 'sheet') {
-        attributes[name] = this.deserializeRowData(this.findSheet(payload, name));
+        attributes[name] = this.deserializeRowData(this.findSheet(spreadsheet, name));
       }
     });
 
     this.applyTransforms(model, attributes, 'deserialize');
 
-    return { id, type, attributes };
+    let from: Link;
+    let to: Link;
+
+    if (file.ownedByMe) {
+      from = {
+        type: 'user',
+        id: this.currentUser.email
+      };
+
+      let recipient = file.permissions.find(p =>
+        p.emailAddress !== this.currentUser.email
+      );
+
+      assert('Missing permission in File', recipient);
+      assert('Missing emailAddress in Permission', recipient.emailAddress);
+
+      to = {
+        type: 'user',
+        id: recipient.emailAddress
+      };
+    } else {
+      assert('Missing emailAddress in sharingUser', file.sharingUser.emailAddress);
+
+      from = {
+        type: 'user',
+        id: file.sharingUser.emailAddress
+      };
+
+      to = {
+        type: 'user',
+        id: this.currentUser.email
+      };
+    }
+
+    return {
+      type,
+      id,
+      attributes,
+      relationships: {
+        from: { data: from },
+        to: { data: to }
+      }
+    };
+  }
+
+  private extractIncluded(payload: AdapterRecord[]): NormalizedRecord[] {
+    let users: Record<string, User> = {};
+
+    let currentUserEmail = this.currentUser.email;
+
+    users[currentUserEmail] = this.currentUser;
+
+    for (let { file } of payload) {
+      if (file.ownedByMe) {
+        for (let { displayName, emailAddress, photoLink } of file.permissions) {
+          if (emailAddress !== currentUserEmail) {
+            assert('Missing displayName in Permission', displayName);
+            assert('Missing emailAddress in Permission', emailAddress);
+
+            users[emailAddress] = {
+              name: displayName,
+              email: emailAddress,
+              picture: photoLink
+            };
+          }
+        }
+      } else {
+        let { displayName, emailAddress, photoLink } = file.sharingUser;
+
+        assert('Missing displayName in User', displayName);
+        assert('Missing emailAddress in User', emailAddress);
+
+        users[emailAddress] = {
+          name: displayName,
+          email: emailAddress,
+          picture: photoLink
+        };
+      }
+    }
+
+    return Object.values(users).map(user => ({
+      type: 'user',
+      id: user.email,
+      attributes: user as unknown as Record<string, unknown>
+    }));
   }
 
   private applyTransforms<ModelClass extends typeof Model>(
@@ -409,10 +517,16 @@ export default class SpreadsheetSerializer extends Serializer {
   private countColumns(rows: RowData[]): number {
     return Math.max(...rows.map(row => row.values?.length || 0));
   }
-}
 
-declare module 'ember-data/types/registries/serializer' {
-  export default interface SerializerRegistry {
-    'spreadsheet': SpreadsheetSerializer;
+  private get currentUser(): User {
+    let { currentUser } = this.session;
+    assert('not logged in', currentUser);
+
+    let profile = currentUser.getBasicProfile();
+    let name = profile.getName();
+    let email = profile.getEmail();
+    let picture = profile.getImageUrl();
+
+    return { name, email, picture };
   }
 }

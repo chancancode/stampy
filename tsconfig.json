@@ -21,10 +21,10 @@
     "module": "es6",
     "experimentalDecorators": true,
     "paths": {
-      "stamps/tests/*": [
+      "stampy/tests/*": [
         "tests/*"
       ],
-      "stamps/*": [
+      "stampy/*": [
         "app/*"
       ],
       "*": [

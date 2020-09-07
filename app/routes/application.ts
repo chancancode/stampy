@@ -1,16 +1,12 @@
 import Route from '@ember/routing/route';
-import config from 'stamps/config/environment';
+import config from 'stampy/config/environment';
 
 export default class ApplicationRoute extends Route {
   async beforeModel(): Promise<void> {
     await window.scripts.platform;
 
     await new Promise(resolve => {
-      gapi.load('client:auth2', resolve)
-    });
-
-    await new Promise(resolve => {
-      gapi.load('picker', resolve);
+      gapi.load('client:auth2:picker', resolve);
     });
 
     await gapi.client.init({
@@ -24,9 +20,7 @@ export default class ApplicationRoute extends Route {
         'email',
         'profile',
         'https://www.googleapis.com/auth/drive.file',
-        'https://www.googleapis.com/auth/drive.install'
-        // 'https://www.googleapis.com/auth/drive.metadata.readonly',
-        // 'https://www.googleapis.com/auth/spreadsheets.readonly'
+        'https://www.googleapis.com/auth/drive.apps.readonly'
       ].join(' ')
     });
   }

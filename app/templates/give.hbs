@@ -1,1 +1,3 @@
-Give
+{{#each @model as |card|}}
+  <StampCard @card={{card}} />
+{{/each}}

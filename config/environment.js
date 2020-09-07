@@ -2,7 +2,7 @@
 
 module.exports = function(environment) {
   let ENV = {
-    modulePrefix: 'stamps',
+    modulePrefix: 'stampy',
     environment,
     rootURL: '/',
     locationType: 'auto',
