@@ -3,12 +3,12 @@ import { inject as service } from '@ember/service';
 
 import SessionService from 'stampy/services/session';
 
-export default class SignInRoute extends Route {
+export default class SignOutRoute extends Route {
   @service private session!: SessionService;
 
-  activate(): void {
-    this.session.signIn().then(() => {
-      this.transitionTo('authenticated.index');
-    });
+  async beforeModel(): Promise<void> {
+    await this.session.signOut();
+    this.store.unloadAll();
+    this.replaceWith('signin');
   }
 }

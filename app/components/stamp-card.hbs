@@ -4,32 +4,36 @@
 >
   <h1>{{@card.title}}</h1>
   <h2>{{@card.description}}</h2>
-  <p class="stamps">
-    <ol>
-      {{#each @card.slots as |slot|}}
-        {{#if slot}}
-          <li class="filled">
-            <Icon
-              @name="collect"
-              fill={{@card.foregroundColor}}
-              alt="{{format-date slot.date}} {{slot.notes}}"
-            />
-          </li>
-        {{else}}
-          <li />
+  {{#let @card.slots as |slots|}}
+    <p class="stamps {{if (gt slots.length 20) (if (gt slots.length 30) "tiny" "small")}}">
+      <ol>
+        {{#each slots as |slot|}}
+          {{#if slot}}
+            <li class="filled">
+              <Icon
+                @name="collect"
+                fill={{@card.foregroundColor}}
+                alt="{{format-date slot.date}} {{slot.notes}}"
+              />
+            </li>
+          {{else}}
+            <li />
+          {{/if}}
+        {{/each}}
+      </ol>
+    </p>
+  {{/let}}
+  {{#if (or @cards.expirationDate @card.terms.length)}}
+    <p class="terms">
+      <h3>Terms and Conditions:</h3>
+      <ul>
+        {{#if @card.expirationDate}}
+          <li>Expires {{format-date @card.expirationDate}}.</li>
         {{/if}}
-      {{/each}}
-    </ol>
-  </p>
-  <p class="terms">
-    <h3>Terms and Conditions:</h3>
-    <ul>
-      {{#if @card.expirationDate}}
-        <li>Expires {{format-date @card.expirationDate}}.</li>
-      {{/if}}
-      {{#each @card.terms as |term|}}
-        <li>{{term}}</li>
-      {{/each}}
-    </ul>
-  </p>
+        {{#each @card.terms as |term|}}
+          <li>{{term}}</li>
+        {{/each}}
+      </ul>
+    </p>
+  {{/if}}
 </article>

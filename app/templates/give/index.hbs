@@ -1,3 +1,12 @@
 {{#each @model as |card|}}
   <StampCard @card={{card}} />
 {{/each}}
+
+<LinkTo @route="give.new" class="placeholder-card new-link">
+  <h2>Feeling Generous?</h2>
+  <span>
+    It might not be Christmas yet, but there are no rules
+    against sending a gift today!
+  </span>
+  <Icon @name="christmas" />
+</LinkTo>

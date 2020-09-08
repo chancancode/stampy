@@ -116,7 +116,7 @@ main {
 
       display: grid;
       place-content: center;
-      grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
       gap: 8px;
     }
 
@@ -161,6 +161,27 @@ main {
       background: rgba(255,255,255,0.5);
       padding: 100% 100% 0 0;
       mix-blend-mode: soft-light;
+    }
+
+    &.small {
+      ol {
+        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+      }
+
+      li:before {
+        font-size: 1.2em;
+      }
+    }
+
+    &.tiny {
+      ol {
+        grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+      }
+
+      li:before {
+        font-size: 1em;
+        font-weight: 200;
+      }
     }
   }
 
@@ -227,6 +248,32 @@ a.placeholder-card {
 
   &, &:active, &:visited {
     color: rgba(42,2,48,0.5);
+  }
+}
+
+.card-designer {
+  grid-column: 1 / -1;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  align-items: center;
+
+  margin: 0px -8px;
+
+  & > * {
+    flex-grow: 1;
+    min-width: 280px;
+    padding: 0px 8px;
+  }
+
+  .card-preview {
+    max-width: 400px;
+  }
+
+  .card-editor {
+    max-width: 600px;
+    display: grid;
   }
 }
 

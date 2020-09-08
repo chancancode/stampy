@@ -6,6 +6,12 @@ type GoogleAuth = gapi.auth2.GoogleAuth;
 
 export type GoogleUser = gapi.auth2.GoogleUser;
 
+function timeout(amount: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, amount);
+  });
+}
+
 export default class SessionService extends Service {
   @tracked currentUser: GoogleUser | null = null;
 
@@ -25,7 +31,13 @@ export default class SessionService extends Service {
   }
 
   async signOut(): Promise<void> {
-    this.auth.signOut();
+    // This doesn't seem to actually wait for the signout?
+    await this.auth.signOut();
+
+    // TODO: replace this HAX with something better?
+    while (this.currentUser) {
+      await timeout(50);
+    }
   }
 
   private get auth(): GoogleAuth {

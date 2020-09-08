@@ -1,0 +1,129 @@
+<div class="card-designer">
+  <div class="card-preview">
+    <StampCard @card={{this.preview}} />
+  </div>
+
+  <form class="card-editor" {{on "submit" this.submit}} {{on "reset" this.reset}}>
+    {{#let this.id as |id|}}
+      <label for="{{id}}-title">Title</label>
+      <Input
+        id="{{id}}-title"
+        @value={{this.title}}
+        placeholder="Free Drink"
+        disabled={{this.isSubmitting}}
+        required
+      />
+
+      <label for="{{id}}-description">Description</label>
+      <Input
+        id="{{id}}-description"
+        @value={{this.description}}
+        placeholder="Fill this up and get a free drink on me!"
+        disabled={{this.isSubmitting}}
+        required
+      />
+
+      <label for="{{id}}-background-color">Background Color</label>
+      <Input
+        id="{{id}}-background-color"
+        @type="color"
+        @value={{this.backgroundColor}}
+        disabled={{this.isSubmitting}}
+        required
+      />
+
+      <label for="{{id}}-foreground-color">Text Color</label>
+      <Input
+        id="{{id}}-foreground-color"
+        @type="color"
+        @value={{this.foregroundColor}}
+        disabled={{this.isSubmitting}}
+        required
+      />
+
+      <label for="{{id}}-goal">Number of Stamps</label>
+      <Input
+        id="{{id}}-goal"
+        @type="number"
+        @value={{this.goal}}
+        min="1"
+        max="50"
+        step="1"
+        disabled={{this.isSubmitting}}
+        required
+      />
+
+      <label for="{{id}}-expires">Expires?</label>
+      <Input
+        id="{{id}}-expires"
+        @type="checkbox"
+        @checked={{this.expires}}
+        disabled={{this.isSubmitting}}
+      />
+
+      {{#if this.expires}}
+        <label for="{{id}}-expiration-date">Expiration Date</label>
+        <Input
+          id="{{id}}-expiration-date"
+          @type="date"
+          @value={{this.expirationDateValue}}
+          disabled={{this.isSubmitting}}
+          required
+        />
+      {{/if}}
+
+      <label for="{{id}}-terms">Terms and Conditions</label>
+      <Textarea
+        id="{{id}}-terms"
+        @value={{this.termsValue}}
+        rows="5"
+        disabled={{this.isSubmitting}}
+      />
+
+      {{#if this.isNew}}
+        <label for="{{id}}-email-address">Recipient Email Address</label>
+        <Input
+          id="{{id}}-email-address"
+          @value={{this.emailAddress}}
+          disabled={{this.isSubmitting}}
+          required
+        />
+
+        <label for="{{id}}-send-notification-email">Send Notification Email</label>
+        <Input
+          id="{{id}}-send-notification-email"
+          @type="checkbox"
+          @checked={{this.sendNotificationEmail}}
+          disabled={{this.isSubmitting}}
+        />
+
+        {{#if this.sendNotificationEmail}}
+          <label for="{{id}}-email-message">Email Message</label>
+          <Textarea
+            id="{{id}}-email-message"
+            @value={{this.emailMessage}}
+            disabled={{this.isSubmitting}}
+          />
+        {{/if}}
+      {{/if}}
+
+      <button type="submit" disabled={{this.isSubmitting}}>
+        {{#if this.isNew}}
+          {{#if this.isSubmitting}}
+            Sending...
+          {{else}}
+            Send
+          {{/if}}
+        {{else}}
+          {{#if this.isSubmitting}}
+            Saving...
+          {{else}}
+            Save
+          {{/if}}
+        {{/if}}
+      </button>
+
+      <button type="reset" disabled={{this.isSubmitting}}>Reset</button>
+    {{/let}}
+  </form>
+</div>

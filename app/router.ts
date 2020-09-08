@@ -8,6 +8,7 @@ export default class Router extends EmberRouter {
 
 Router.map(function() {
   this.route('signin');
+  this.route('signout');
   this.route('authenticated', { path: '' }, function() {
     this.route('open', { resetNamespace: true, path: '/open/:id' });
     this.route('import', { resetNamespace: true });
