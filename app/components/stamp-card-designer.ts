@@ -11,6 +11,43 @@ import Router from 'stampy/router';
 import { SharingOptions } from 'stampy/adapters/application';
 import StampCard from 'stampy/models/stamp-card';
 
+function pad(value: number, length = 2): string {
+  return value.toFixed(0).padStart(length, '0');
+}
+
+function parseDate(value: string): Date | undefined {
+  let date: Date | undefined;
+  let match = /^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})$/.exec(value);
+
+  if (match) {
+    let year = parseInt(match[1], 10);
+    let month = parseInt(match[2], 10) - 1;
+    let day = parseInt(match[3], 10);
+
+    date = new Date(year, month, day, 23, 59, 59, 999);
+
+    if (isNaN(date.valueOf())) {
+      date = undefined;
+    }
+  }
+
+  return date;
+}
+
+function formatDate(value?: Date): string | undefined {
+  if (!value) {
+    return;
+  }
+
+  assert('Invalid date', !isNaN(value.valueOf()));
+
+  let year = pad(value.getFullYear(), 4);
+  let month = pad(value.getMonth() + 1, 2);
+  let day = pad(value.getDate(), 2);
+
+  return `${year}-${month}-${day}`;
+}
+
 type Slot = [Date, string?] | undefined;
 
 interface StampCardAttributes {
@@ -113,38 +150,32 @@ export default class StampCardDesignerComponent extends Component<StampCardDesig
     return !this.isNew;
   }
 
-  get expirationDateValue(): string {
-    let { expirationDate: date } = this;
+  @tracked _expirationDateValue?: string;
 
-    if (date) {
-      return `${date.toISOString().slice(0, 10)}`;
-    } else {
-      return '';
-    }
+  get expirationDateValue(): string {
+    return this._expirationDateValue ||
+      formatDate(this.expirationDate) ||
+      '';
   }
 
   set expirationDateValue(value: string) {
-    let date = new Date(value);
-
-    if (isNaN(date.valueOf())) {
-      this.expirationDate = undefined;
-    } else {
-      this.expirationDate = date;
-    }
+    this._expirationDateValue = value;
+    this.expirationDate = parseDate(value);
   }
 
+  @tracked _termsValue: string | undefined;
+
   get termsValue(): string {
-    return this.terms.join('\n');
+    return this._termsValue || this.terms.join('\n');
   }
 
   set termsValue(value: string) {
-    value = value.trim();
+    this._termsValue = value;
 
-    if (value) {
-      this.terms = Object.freeze(value.trim().split('\n'));
-    } else {
-      this.terms = Object.freeze([]);
-    }
+    this.terms = value
+      .split('\n')
+      .map(v => v.trim())
+      .filter(v => v);
   }
 
   get attributes(): StampCardAttributes {
