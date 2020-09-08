@@ -297,12 +297,12 @@ a.placeholder-card {
   color: white;
 
   &.show {
-    top: 0%;
+    transform: translateY(0%);
     opacity: 1;
   }
 
   &.hide {
-    top: 100%;
+    transform: translateY(100%);
     opacity: 0;
   }
 
