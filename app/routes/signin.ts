@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import Route from '@ember/routing/route';
 import { inject as service } from '@ember/service';
 
@@ -7,8 +8,9 @@ export default class SignInRoute extends Route {
   @service private session!: SessionService;
 
   activate(): void {
-    this.session.signIn().then(() => {
-      this.transitionTo('authenticated.index');
-    });
+    this.session.signIn().then(
+      () => { this.transitionTo('authenticated.index') },
+      Ember.onerror
+    );
   }
 }

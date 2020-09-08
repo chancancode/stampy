@@ -16,6 +16,10 @@ Ember.onerror = (error: unknown) => {
   if (typeof error === 'string') {
     details = error;
   } else if (isError(error)) {
+    if (isBenign(error)) {
+      return;
+    }
+
     details = error.name || 'Error';
 
     if (error.message) {
@@ -67,6 +71,8 @@ Ember.onerror = (error: unknown) => {
   console.error(error);
 };
 
+Ember.RSVP.on('error', Ember.onerror);
+
 function isPartial<T extends {}>(error: unknown): error is Partial<T> {
   return error && typeof error === 'object';
 }
@@ -82,6 +88,10 @@ function isError(error: unknown): error is Error {
 function isResponse(error: unknown): error is gapi.client.Response<unknown> {
   return isPartial<gapi.client.Response<unknown>>(error) &&
     typeof error.body === 'string';
+}
+
+function isBenign(error: Error): boolean {
+  return error.name === 'TransitionAborted';
 }
 
 loadInitializers(App, config.modulePrefix);
