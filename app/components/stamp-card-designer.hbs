@@ -76,8 +76,8 @@
       <Textarea
         id="{{id}}-terms"
         @value={{this.termsValue}}
-        rows="5"
         disabled={{this.isSubmitting}}
+        {{auto-resize}}
       />
 
       {{#if this.isNew}}
@@ -103,6 +103,7 @@
             id="{{id}}-email-message"
             @value={{this.emailMessage}}
             disabled={{this.isSubmitting}}
+            {{auto-resize}}
           />
         {{/if}}
       {{/if}}
