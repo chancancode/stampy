@@ -8,10 +8,11 @@ export default class ImportRoute extends Route {
   @service private session!: SessionService;
 
   queryParams = {
-    q: { refreshModel: true }
+    q: { refreshModel: true },
+    return: { refreshModel: true }
   };
 
-  async model(params: { q?: string }): Promise<void> {
+  async model(params: { q?: string, return?: string }): Promise<void> {
     let auth = this.session.currentUser!.getAuthResponse();
 
     let view = new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS);
@@ -28,18 +29,22 @@ export default class ImportRoute extends Route {
     builder.enableFeature(google.picker.Feature.NAV_HIDDEN);
     builder.setSize(window.innerWidth, window.innerHeight);
     builder.hideTitleBar();
-    let promise = new Promise(resolve => {
-      builder.setCallback(({ action }: { action: string }) => {
+    let promise = new Promise<string | undefined>(resolve => {
+      builder.setCallback(({ action, docs }: { action: string, docs?: Array<{ id: string }> }) => {
         if (action === google.picker.Action.PICKED || action === google.picker.Action.CANCEL) {
-          resolve();
+          resolve(docs?.[0]?.id);
         }
       });
     });
     let picker = builder.build();
     picker.setVisible(true);
 
-    await promise;
+    let id = await promise;
 
-    this.replaceWith('collect');
+    if (id) {
+      this.replaceWith('open', id);
+    } else {
+      this.replaceWith(params.return || '/');
+    }
   }
 }

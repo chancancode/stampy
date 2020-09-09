@@ -2,7 +2,7 @@
   <StampCard @card={{card}} />
 {{/each}}
 
-<LinkTo @route="import" class="placeholder-card import-link">
+<LinkTo @route="import" @query={{hash return="collect"}} class="placeholder-card import-link">
   <h2>Missing Something?</h2>
   <span>
     Stampy needs your permission to access files on Google Drive,

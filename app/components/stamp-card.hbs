@@ -1,6 +1,8 @@
 <article
   class="stamp-card"
   style="background: {{{@card.backgroundColor}}}; color: {{{@card.foregroundColor}}}"
+  tabindex="0"
+  ...attributes
 >
   <h1>{{@card.title}}</h1>
   <h2>{{@card.description}}</h2>
@@ -35,5 +37,15 @@
         {{/each}}
       </ul>
     </p>
+  {{/if}}
+
+  {{#if this.isOwner}}
+    <LinkTo @route="give.edit" @model={{@card.id}} class="edit">
+      <Icon @name="edit" style="fill: {{{@card.foregroundColor}}}" />
+    </LinkTo>
+
+    <button type="button" class="trash" {{on "click" this.trash}}>
+      <Icon @name="trash" style="fill: {{{@card.foregroundColor}}}" />
+    </button>
   {{/if}}
 </article>

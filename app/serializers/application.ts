@@ -361,7 +361,7 @@ export default class ApplicationSerializer extends Serializer {
 
     model.eachTransformedAttribute((name, type) => {
       if (type === 'sheet') {
-        let data = attributes[name][1];
+        let data = attributes[name]?.[1];
 
         if (Array.isArray(data)) {
           requests.push(...this.serializeSheetUpdate(spreadsheet, name, data));

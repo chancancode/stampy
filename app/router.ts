@@ -16,6 +16,7 @@ Router.map(function() {
     this.route('collect', { resetNamespace: true });
     this.route('give', { resetNamespace: true }, function() {
       this.route('new');
+      this.route('edit', { path: '/edit/:id' });
     });
     this.route('account', { resetNamespace: true });
   });

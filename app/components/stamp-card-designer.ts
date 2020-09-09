@@ -55,7 +55,7 @@ function timeout(amount: number): Promise<void> {
   });
 }
 
-type Slot = [Date, string?] | undefined;
+type Slot = [Date, string] | undefined;
 
 interface StampCardAttributes {
   title: string;

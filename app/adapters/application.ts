@@ -266,7 +266,7 @@ export default class ApplicationAdapter extends Adapter {
   }
 
   private async deleteFile(fileId: string): Promise<void> {
-    await gapi.client.drive.files.delete({ fileId });
+    await gapi.client.drive.files.update({ fileId, resource: { trashed: true } });
   }
 
   private async findSpreadsheet(id: string): Promise<Spreadsheet> {

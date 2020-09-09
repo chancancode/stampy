@@ -37,6 +37,10 @@ export default class StampCard extends SpreadsheetModel {
 
     return [...filled, ...empty];
   }
+
+  get isComplete(): boolean {
+    return !!this.stamps && this.stamps.length >= this.goal;
+  }
 }
 
 declare module 'ember-data/types/registries/model' {

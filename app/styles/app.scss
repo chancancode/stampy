@@ -64,7 +64,7 @@ nav {
         }
       }
 
-      a.active:not(.ember-transitioning-out), a.ember-transitioning-in {
+      a.active:not(.ember-transitioning-out), a.loading, a.ember-transitioning-in {
         color: rgb(175, 30, 230);
 
         svg {
@@ -72,7 +72,7 @@ nav {
         }
       }
 
-      a.ember-transitioning-in {
+      a.loading, a.ember-transitioning-in {
         svg {
           animation-name: bounce;
           animation-duration: 1.5s;
@@ -111,6 +111,7 @@ main {
 }
 
 .stamp-card {
+  position: relative;
   padding: 16px;
   border-radius: 5px;
 
@@ -233,6 +234,46 @@ main {
       display: inline;
       margin: 0;
       padding: 0;
+    }
+  }
+
+
+  .edit, .trash {
+    position: absolute;
+    box-sizing: content-box;
+    top: 8px;
+    right: 8px;
+    opacity: 0;
+    margin: 0px;
+    padding: 0px;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    &:focus {
+      opacity: 1;
+    }
+  }
+
+  .edit {
+    right: 40px;
+  }
+
+  &.inert {
+    .edit, .trash {
+      display: none;
+    }
+  }
+
+  &:hover, &:focus {
+    .edit, .trash {
+      opacity: 1;
     }
   }
 }
