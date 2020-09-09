@@ -110,6 +110,80 @@ main {
   gap: 16px;
 }
 
+.account {
+  grid-column: 1 / -1;
+  justify-self: center;
+
+  display: grid;
+  grid-template-columns: minmax(280px, 400px);
+  gap: 16px;
+
+  a {
+    padding: 16px 32px;
+    text-align: center;
+    background: rgb(245, 245, 245);
+    border-radius: 4px;
+    border: 1px solid #dedede;
+    font-weight: 400;
+    text-decoration: none;
+
+    &, &:active, &:visited {
+      color: rgb(175, 30, 230);
+    }
+  }
+}
+
+.profile {
+  display: grid;
+  grid-auto-rows: max-content;
+  grid-auto-columns: max-content;
+  gap: 0px 16px;
+
+  padding: 16px 32px;
+  background: rgba(250, 235, 255, 0.8);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border-radius: 4px;
+  border: 1px solid #dedede;
+
+  img, .initial {
+    grid-row: span 2;
+    grid-column: 1;
+
+    margin: 0px;
+    padding: 0px;
+    width: 72px;
+    height: 72px;
+    line-height: 72px;
+    border-radius: 36px;
+
+    background: rgb(175, 30, 230);
+    color: white;
+  }
+
+  .initial {
+    text-align: center;
+    font-family: Oswald;
+    font-weight: 400;
+    font-size: 2em;
+  }
+
+  .name, .email {
+    grid-column: 2;
+  }
+
+  .name {
+    align-self: end;
+    font-size: 1.4em;
+    font-weight: 700;
+  }
+
+  .email {
+    align-self: start;
+  }
+}
+
+
 .stamp-card {
   position: relative;
   padding: 16px;
