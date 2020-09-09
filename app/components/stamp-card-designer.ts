@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 
 import Ember from 'ember';
+import { getOwner } from '@ember/application';
 import { assert } from '@ember/debug';
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
@@ -287,6 +288,7 @@ export default class StampCardDesignerComponent extends Component<StampCardDesig
       .then(() => this.isSubmitted = true)
       .then(() => timeout(500))
       .then(() => this.router.transitionTo('give'))
+      .then(() => getOwner(this).lookup('route:give').refresh())
       .catch(Ember.onerror)
   }
 

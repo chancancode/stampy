@@ -64,12 +64,33 @@ nav {
         }
       }
 
-      a.active {
+      a.active:not(.ember-transitioning-out), a.ember-transitioning-in {
         color: rgb(175, 30, 230);
 
         svg {
           fill: rgb(175, 30, 230);
         }
+      }
+
+      a.ember-transitioning-in {
+        svg {
+          animation-name: bounce;
+          animation-duration: 1.5s;
+          animation-delay: 0.25s;
+          animation-iteration-count: infinite;
+          animation-timing-function: cubic-bezier(0.280, 0.840, 0.420, 1);
+          transform-origin: bottom;
+        }
+      }
+
+      @keyframes bounce {
+        0%   { transform: scale(1,1)      translateY(0); }
+        10%  { transform: scale(1.1,.9)   translateY(0); }
+        30%  { transform: scale(.9,1.1)   translateY(-10px); }
+        50%  { transform: scale(1.05,.95) translateY(0); }
+        57%  { transform: scale(1,1)      translateY(-1px); }
+        64%  { transform: scale(1,1)      translateY(0); }
+        100% { transform: scale(1,1)      translateY(0); }
       }
     }
   }
@@ -382,11 +403,7 @@ a.placeholder-card {
         opacity: 0.75;
       }
 
-      &:placeholder-shown {
-        background: none !important;
-      }
-
-      &:invalid {
+      &:invalid:not(:placeholder-shown):not(:focus) {
         background: rgba(255, 175, 100, 0.3);
       }
     }
