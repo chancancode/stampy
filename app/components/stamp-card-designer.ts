@@ -48,6 +48,12 @@ function formatDate(value?: Date): string | undefined {
   return `${year}-${month}-${day}`;
 }
 
+function timeout(amount: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, amount);
+  });
+}
+
 type Slot = [Date, string?] | undefined;
 
 interface StampCardAttributes {
@@ -81,14 +87,12 @@ const PLACEHOLDERS: Readonly<StampCardAttributes> = Object.freeze({
     'No cash value.',
     'All rights reserved.',
     'Void where prohibited.'
-  ]
+  ],
+  emailAddress: 'jane@example.com',
+  emailMessage: 'Hey, I shared a stamp card for you!'
 });
 
-let ID = 0;
-
 export default class StampCardDesignerComponent extends Component<StampCardDesignerArgs> {
-  id = `stamp-card-designer-${ID++}`;
-
   @service store!: Store;
   @service router!: Router;
 
@@ -111,6 +115,12 @@ export default class StampCardDesignerComponent extends Component<StampCardDesig
   @tracked emailMessage = '';
 
   @tracked isSubmitting = false;
+  @tracked isSubmitted = false;
+  @tracked isCanceled = false;
+
+  get isShown(): boolean {
+    return !(this.isSubmitted || this.isCanceled);
+  }
 
   constructor(owner: unknown, args: StampCardDesignerArgs) {
     super(owner, args);
@@ -163,6 +173,10 @@ export default class StampCardDesignerComponent extends Component<StampCardDesig
     this.expirationDate = parseDate(value);
   }
 
+  get expirationDatePlaceholderValue(): string {
+    return formatDate(this.placeholders.expirationDate) || '';
+  }
+
   @tracked _termsValue: string | undefined;
 
   get termsValue(): string {
@@ -176,6 +190,10 @@ export default class StampCardDesignerComponent extends Component<StampCardDesig
       .split('\n')
       .map(v => v.trim())
       .filter(v => v);
+  }
+
+  get termsPlaceholderValue(): string {
+    return this.placeholders.terms.join('\n');
   }
 
   get attributes(): StampCardAttributes {
@@ -265,15 +283,18 @@ export default class StampCardDesignerComponent extends Component<StampCardDesig
       promise = card.save();
     }
 
-    promise.then(
-      () => this.router.transitionTo('give'),
-      Ember.onerror
-    );
+    promise
+      .then(() => this.isSubmitted = true)
+      .then(() => timeout(500))
+      .then(() => this.router.transitionTo('give'))
+      .catch(Ember.onerror)
   }
 
-  @action reset(event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.resetFields();
+  @action cancel(): void {
+    this.isCanceled = true;
+
+    timeout(500)
+      .then(() => this.router.transitionTo('give'))
+      .catch(Ember.onerror);
   }
 }

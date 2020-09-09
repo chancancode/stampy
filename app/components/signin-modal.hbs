@@ -1,4 +1,4 @@
-<div class="full-page-modal signin-modal {{if this.session.currentUser "hide" "show"}}">
+<div class="full-page-modal signin-modal" {{animate (not this.session.currentUser)}}>
   <h1>Stampy</h1>
   <h2>Sign in to start collecting rewards.</h2>
   <div class="google-signin" {{did-insert this.renderGoogleSignin}} />

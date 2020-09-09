@@ -2,7 +2,9 @@ import Ember from 'ember';
 import Application from '@ember/application';
 import Resolver from 'ember-resolver';
 import loadInitializers from 'ember-load-initializers';
+
 import config from 'stampy/config/environment';
+import { animateIn } from 'stampy/modifiers/animate';
 
 export default class App extends Application {
   modulePrefix = config.modulePrefix;
@@ -64,8 +66,7 @@ Ember.onerror = (error: unknown) => {
   let errorModal = document.getElementById('error-modal');
 
   if (errorModal) {
-    errorModal.classList.remove('hide');
-    errorModal.classList.add('show');
+    animateIn(errorModal);
   }
 
   console.error(error);
