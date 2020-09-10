@@ -1,13 +1,13 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 
-import Ember from 'ember';
 import { getOwner } from '@ember/application';
 import { assert } from '@ember/debug';
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Store from '@ember-data/store';
 
+import { onError } from 'stampy/app';
 import Router from 'stampy/router';
 import { SharingOptions } from 'stampy/adapters/application';
 import StampCard from 'stampy/models/stamp-card';
@@ -55,8 +55,6 @@ function timeout(amount: number): Promise<void> {
   });
 }
 
-type Slot = [Date, string] | undefined;
-
 interface StampCardAttributes {
   title: string;
   description: string;
@@ -68,7 +66,7 @@ interface StampCardAttributes {
 }
 
 interface StampCardStub extends StampCardAttributes {
-  slots: readonly Slot[];
+  filled: number;
 }
 
 interface StampCardDesignerArgs {
@@ -234,25 +232,10 @@ export default class StampCardDesignerComponent extends Component<StampCardDesig
     };
   }
 
-  get slots(): Slot[] {
-    let slots: Slot[] = [];
-    let filled = Math.round(this.goal * 2 / 5);
-
-    for (let i=0; i<this.goal; i++) {
-      if (i < filled) {
-        slots.push([new Date(), `Placeholder stamp ${i+1}`]);
-      } else {
-        slots.push(undefined);
-      }
-    }
-
-    return slots;
-  }
-
   get preview(): StampCardStub {
     return {
       ...this.attributes,
-      slots: this.slots
+      filled: Math.round(this.goal * 2 / 5)
     };
   }
 
@@ -289,7 +272,7 @@ export default class StampCardDesignerComponent extends Component<StampCardDesig
       .then(() => timeout(500))
       .then(() => this.router.transitionTo('give'))
       .then(() => getOwner(this).lookup('route:give').refresh())
-      .catch(Ember.onerror)
+      .catch(onError)
   }
 
   @action cancel(): void {
@@ -297,6 +280,6 @@ export default class StampCardDesignerComponent extends Component<StampCardDesig
 
     timeout(500)
       .then(() => this.router.transitionTo('give'))
-      .catch(Ember.onerror);
+      .catch(onError);
   }
 }

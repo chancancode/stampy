@@ -9,10 +9,18 @@ import { CreateSpreadsheet, UpdateSpreadsheet } from 'stampy/serializers/applica
 
 type Permission = gapi.client.drive.Permission;
 type User = gapi.client.drive.User;
+type File = gapi.client.drive.File;
 type Spreadsheet = gapi.client.sheets.Spreadsheet;
 
 export const SPREADSHEET_Q = "appProperties has { key='model' and value='true' } and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false";
 export const FOLDER_Q = "appProperties has { key='root' and value='true' } and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
+
+// Same as SPREADSHEET_Q
+export function isValidFile(file: File): boolean {
+  return file.appProperties?.model === 'true' &&
+    file.mimeType === 'application/vnd.google-apps.spreadsheet' &&
+    file.trashed !== true;
+}
 
 export type RecordFile = {
   id: string;
@@ -38,6 +46,12 @@ export interface SharingOptions {
 }
 
 export default class ApplicationAdapter extends Adapter {
+  // HACK: The list API is sometimes delayed in returning recently created or
+  // imported files in the response, causing records we know about to vanish.
+  // The get API does not have this issue, so we keep a list of recently seen
+  // IDs and suppliment the list response with these if needed.
+  private recentlySeenIds: Set<string> = new Set();
+
   findRecord<K extends keyof ModelRegistry>(
     _store: Store,
     _type: ModelRegistry[K],
@@ -206,6 +220,8 @@ export default class ApplicationAdapter extends Adapter {
       }
     });
 
+    this.recentlySeenIds.add(fileId);
+
     return { file: file as RecordFile, spreadsheet };
   }
 
@@ -227,30 +243,29 @@ export default class ApplicationAdapter extends Adapter {
     };
   }
 
-  private async findFileById(fileId: string): Promise<RecordFile> {
-    let { result } = await gapi.client.drive.files.get({
+  private async findFileById(fileId: string, validate = true): Promise<RecordFile> {
+    let { result: file, body } = await gapi.client.drive.files.get({
       fileId,
-      fields: 'id, ownedByMe, permissions, sharingUser'
+      fields: 'id, appProperties, mimeType, trashed, ownedByMe, permissions, sharingUser'
     });
 
-    return result as RecordFile;
+    if (validate) {
+      assert(`Invalid file:\n${body}`, isValidFile(file));
+      this.recentlySeenIds.add(fileId);
+    }
+
+    return file as RecordFile;
   }
 
   private async findFileByQuery(q: string): Promise<RecordFile | undefined> {
-    let { result } = await gapi.client.drive.files.list({
-      corpora: 'user',
-      fields: 'files(id, ownedByMe, permissions, sharingUser)',
-      pageSize: 1,
-      q
-    });
-
-    return result.files?.[0] as RecordFile | undefined;
+    return (await this.listFiles(q))[0];
   }
 
-  private async listFiles(q: string, pageToken?: string): Promise<RecordFile[]> {
+  // used by user adapter
+  async listFiles(q: string = SPREADSHEET_Q, pageToken?: string): Promise<RecordFile[]> {
     let { result } = await gapi.client.drive.files.list({
       corpora: 'user',
-      fields: 'nextPageToken, files(id, ownedByMe, permissions, sharingUser)',
+      fields: 'nextPageToken, files(id, appProperties, mimeType, trashed, ownedByMe, permissions, sharingUser)',
       pageSize: 1000,
       pageToken,
       q
@@ -260,13 +275,36 @@ export default class ApplicationAdapter extends Adapter {
 
     if (result.nextPageToken) {
       return [...files, ...await this.listFiles(q, result.nextPageToken)];
+    } else if (q !== SPREADSHEET_Q) {
+      return files;
     } else {
+      let ids = files.map(file => file.id);
+
+      files = files.filter(isValidFile);
+
+      for (let fileId of this.recentlySeenIds) {
+        if (!ids.includes(fileId)) {
+          try {
+            let file = await this.findFileById(fileId, false);
+
+            if (isValidFile(file)) {
+              files.unshift(file);
+            } else {
+              this.recentlySeenIds.delete(fileId);
+            }
+          } catch {
+            // ignore
+          }
+        }
+      }
+
       return files;
     }
   }
 
   private async deleteFile(fileId: string): Promise<void> {
     await gapi.client.drive.files.update({ fileId, resource: { trashed: true } });
+    this.recentlySeenIds.delete(fileId);
   }
 
   private async findSpreadsheet(id: string): Promise<Spreadsheet> {
@@ -301,5 +339,11 @@ export default class ApplicationAdapter extends Adapter {
     });
 
     return result.updatedSpreadsheet!;
+  }
+}
+
+declare module 'ember-data/types/registries/adapter' {
+  export default interface AdapterRegistry {
+    'application': ApplicationAdapter;
   }
 }

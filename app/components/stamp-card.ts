@@ -1,23 +1,43 @@
 import Component from '@glimmer/component';
 
-import Ember from 'ember';
-import { getOwner } from '@ember/application';
-import { assert } from '@ember/debug';
 import { action } from '@ember/object';
-import { inject as service } from '@ember/service';
 
+import { onError } from 'stampy/app';
 import StampCard from 'stampy/models/stamp-card';
-import SessionService from 'stampy/services/session';
 
 interface StampCardArgs {
-  card?: StampCard;
+  card: StampCard;
+}
+
+interface Slot {
+  filled: boolean;
 }
 
 export default class StampCardComponent extends Component<StampCardArgs> {
-  @service session!: SessionService;
+  get card(): StampCard {
+    return this.args.card;
+  }
 
-  get isOwner(): boolean {
-    return this.args.card?.from?.get('id') === this.currentUserEmail;
+  get size(): string {
+    if (this.card.goal > 30) {
+      return 'tiny';
+    } else if (this.card.goal > 20) {
+      return 'small';
+    } else {
+      return 'regular'
+    }
+  }
+
+  get slots(): Slot[] {
+    let slots: Slot[] = [];
+
+    let { filled, goal } = this.card;
+
+    for (let i=0; i<goal; i++) {
+      slots.push({ filled: i < filled });
+    }
+
+    return slots;
   }
 
   @action trash(): void {
@@ -27,13 +47,7 @@ export default class StampCardComponent extends Component<StampCardArgs> {
       card
         .destroyRecord()
         .then(c => c.unloadRecord())
-        .then(() => getOwner(this).lookup('route:authenticated').refresh())
-        .catch(Ember.onerror);
+        .catch(onError);
     }
-  }
-
-  private get currentUserEmail(): string {
-    assert('Missing currentUser', this.session.currentUser);
-    return this.session.currentUser.getBasicProfile().getEmail();
   }
 }

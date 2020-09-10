@@ -55,7 +55,7 @@ interface NormalizedRecord {
 }
 
 export default class ApplicationSerializer extends Serializer {
-  @service session!: SessionService;
+  @service declare session: SessionService;
 
   normalizeResponse(
     store: Store,
@@ -519,10 +519,9 @@ export default class ApplicationSerializer extends Serializer {
   }
 
   private get currentUser(): User {
-    let { currentUser } = this.session;
-    assert('not logged in', currentUser);
+    let { profile } = this.session;
+    assert('not logged in', profile);
 
-    let profile = currentUser.getBasicProfile();
     let name = profile.getName();
     let email = profile.getEmail();
     let picture = profile.getImageUrl();

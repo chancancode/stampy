@@ -1,4 +1,4 @@
-{{#each @model as |card|}}
+{{#each @model.collectable as |card|}}
   <StampCard @card={{card}} />
 {{/each}}
 
@@ -10,5 +10,5 @@
     additional cards in order to track their progress in the
     Stampy app.
   </span>
-  <Icon @name="import" />
+  <Icon @name="import" alt="" />
 </LinkTo>

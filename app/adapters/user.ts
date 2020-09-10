@@ -6,7 +6,6 @@ import { assert } from '@ember/debug';
 import { inject as service } from '@ember/service';
 import RSVP from 'rsvp';
 
-import { SPREADSHEET_Q } from 'stampy/adapters/application';
 import SessionService from 'stampy/services/session';
 
 export interface Link {
@@ -21,23 +20,28 @@ export interface User {
 }
 
 export interface UserWithLinks extends User {
-  gifted: Link[];
+  sent: Link[];
   received: Link[];
 }
 
-type File = gapi.client.drive.File;
 
 export default class UserAdapter extends Adapter {
-  @service session!: SessionService;
+  @service private declare session: SessionService;
+
+  // HACK: The list API is sometimes delayed in returning recently created or
+  // imported files in the response, causing records we know about to vanish.
+  // The get API does not have this issue, so we keep a list of recently seen
+  // IDs and suppliment the list response with these if needed.
+  recentlySeenIds: string[] = [];
 
   findRecord<K extends keyof ModelRegistry>(
-    _store: Store,
+    store: Store,
     _type: ModelRegistry[K],
     id: string,
     _snapshot: DS.Snapshot<K>
   ): RSVP.Promise<UserWithLinks> {
     assert(`findRecord with user ${id} is not supported`, this.isCurrentUser(id));
-    return RSVP.resolve(this.findCurrentUserWithLinks());
+    return RSVP.resolve(this.findCurrentUserWithLinks(store));
   }
 
   findAll<K extends keyof ModelRegistry>(
@@ -61,9 +65,9 @@ export default class UserAdapter extends Adapter {
   queryRecord<K extends keyof ModelRegistry>(
     _store: Store,
     _type: ModelRegistry[K],
-    _query: { me: true }
+    _query: string
   ): RSVP.Promise<UserWithLinks> {
-    return RSVP.resolve(this.findCurrentUserWithLinks());
+    assert('queryRecord is not supported');
   }
 
   createRecord<K extends keyof ModelRegistry>(
@@ -114,10 +118,9 @@ export default class UserAdapter extends Adapter {
   }
 
   private get currentUser(): User {
-    let { currentUser } = this.session;
-    assert('not logged in', currentUser);
+    let { profile } = this.session;
+    assert('not logged in', profile);
 
-    let profile = currentUser.getBasicProfile();
     let name = profile.getName();
     let email = profile.getEmail();
     let picture = profile.getImageUrl();
@@ -125,17 +128,14 @@ export default class UserAdapter extends Adapter {
     return { name, email, picture };
   }
 
-  private async findCurrentUserWithLinks(): Promise<UserWithLinks> {
+  private async findCurrentUserWithLinks(store: Store): Promise<UserWithLinks> {
     let user = this.currentUser;
-    let issued: Link[] = [];
+    let sent: Link[] = [];
     let received: Link[] = [];
 
-    let files = await this.listFiles();
+    let files = await store.adapterFor('application').listFiles();
 
     for (let file of files) {
-      assert('Missing id in File', file.id);
-      assert('Missing appProperties in File', file.appProperties);
-      assert('Missing model in appProperties', 'model' in file.appProperties && file.appProperties.model === 'true');
       assert('Missing type in appProperties', 'type' in file.appProperties);
       assert('Invalid type in appProperties', file.appProperties.type === 'stamp-card');
 
@@ -145,34 +145,18 @@ export default class UserAdapter extends Adapter {
       };
 
       if (file.ownedByMe) {
-        issued.push(link);
+        sent.push(link);
       } else {
         received.push(link);
       }
     }
 
-    return {
-      ...user,
-      gifted: issued,
-      received
-    };
+    return { ...user, sent, received };
   }
+}
 
-  private async listFiles(query?: string, pageToken?: string): Promise<File[]> {
-    let { result } = await gapi.client.drive.files.list({
-      corpora: 'user',
-      fields: 'nextPageToken, files(id, ownedByMe, appProperties)',
-      pageSize: 1000,
-      pageToken,
-      q: SPREADSHEET_Q
-    });
-
-    let files = result.files || [];
-
-    if (result.nextPageToken) {
-      return [...files, ...await this.listFiles(query, result.nextPageToken)];
-    } else {
-      return files;
-    }
+declare module 'ember-data/types/registries/adapter' {
+  export default interface AdapterRegistry {
+    'user': UserAdapter;
   }
 }

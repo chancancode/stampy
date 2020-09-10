@@ -1,10 +1,17 @@
 import Route from '@ember/routing/route';
-import StampCard from 'stampy/models/stamp-card';
+import { onError } from 'stampy/app';
+import User from 'stampy/models/user';
 
 export default class CollectRoute extends Route {
-  async model(): Promise<StampCard[]> {
-    let user = await this.store.queryRecord('user', { me: true });
-    let model = await user.received;
-    return model.filter(card => !card.isComplete);
+  model(): User {
+    return this.modelFor('authenticated') as User;
+  }
+
+  async afterModel(user: User): Promise<void> {
+    let promise = user.refreshCollectable().catch(onError);
+
+    if (user.collectable.length === 0) {
+      await promise;
+    }
   }
 }

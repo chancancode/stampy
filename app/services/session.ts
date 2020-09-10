@@ -1,10 +1,14 @@
-import Service from '@ember/service';
+import Ember from 'ember';
+import Service, { inject as service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
+import Store from '@ember-data/store';
+
+import User from 'stampy/models/user';
 
 type GoogleAuth = gapi.auth2.GoogleAuth;
-
-export type GoogleUser = gapi.auth2.GoogleUser;
+type GoogleUser = gapi.auth2.GoogleUser;
+export type GoogleProfile = gapi.auth2.BasicProfile;
 
 function timeout(amount: number): Promise<void> {
   return new Promise(resolve => {
@@ -13,10 +17,13 @@ function timeout(amount: number): Promise<void> {
 }
 
 export default class SessionService extends Service {
-  @tracked currentUser: GoogleUser | null = null;
+  @service declare store: Store;
 
-  private signInPromise!: Promise<GoogleUser>;
-  private didSignIn!: (user: GoogleUser) => void;
+  @tracked profile: GoogleProfile | null = null;
+  @tracked currentUser: User | null = null;
+
+  private signInPromise!: Promise<User>;
+  private didSignIn!: (user: User) => void;
 
   constructor() {
     super(...arguments);
@@ -26,7 +33,7 @@ export default class SessionService extends Service {
     this.auth.currentUser.listen(this.currentUserDidChange);
   }
 
-  async signIn(): Promise<GoogleUser> {
+  async signIn(): Promise<User> {
     return this.signInPromise;
   }
 
@@ -35,9 +42,13 @@ export default class SessionService extends Service {
     await this.auth.signOut();
 
     // TODO: replace this HAX with something better?
-    while (this.currentUser) {
+    while (this.profile) {
       await timeout(50);
     }
+  }
+
+  get token(): string | null {
+    return this.auth.currentUser.get().getAuthResponse().access_token;
   }
 
   private get auth(): GoogleAuth {
@@ -45,17 +56,27 @@ export default class SessionService extends Service {
   }
 
   private resetSignIn(): void {
-    this.signInPromise = new Promise(resolve => {
-      this.didSignIn = resolve;
+    let promise = this.signInPromise = new Promise(resolve => {
+      this.didSignIn = (user: User) => {
+        if (this.signInPromise === promise) {
+          this.currentUser = user;
+        }
+
+        resolve(user);
+      };
     });
   }
 
   @action private currentUserDidChange(user: GoogleUser): void {
     if (!this.isDestroying) {
       if (user.isSignedIn()) {
-        this.currentUser = user;
-        this.didSignIn(user);
+        let profile = this.profile = user.getBasicProfile();
+        this.store.findRecord('user', profile.getEmail()).then(
+          this.didSignIn,
+          Ember.onerror
+        );
       } else {
+        this.profile = null;
         this.currentUser = null;
         this.resetSignIn();
       }

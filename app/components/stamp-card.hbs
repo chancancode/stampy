@@ -5,16 +5,16 @@
 >
   <h1>{{@card.title}}</h1>
   <h2>{{@card.description}}</h2>
-  {{#let @card.slots as |slots|}}
-    <p class="stamps {{if (gt slots.length 20) (if (gt slots.length 30) "tiny" "small")}}">
+  {{#let this.slots as |slots|}}
+    <p class="stamps {{this.size}}">
       <ol>
         {{#each slots as |slot|}}
-          {{#if slot}}
+          {{#if slot.filled}}
             <li class="filled">
               <Icon
                 @name="collect"
                 fill={{@card.foregroundColor}}
-                alt="{{format-date slot.date}} {{slot.notes}}"
+                alt="Stamp"
               />
             </li>
           {{else}}
@@ -24,7 +24,7 @@
       </ol>
     </p>
   {{/let}}
-  {{#if (or @cards.expirationDate @card.terms.length)}}
+  {{#if (or @card.expirationDate @card.terms.length)}}
     <p class="terms">
       <h3>Terms and Conditions:</h3>
       <ul>
@@ -38,13 +38,13 @@
     </p>
   {{/if}}
 
-  {{#if this.isOwner}}
+  {{#if @card.isSentFromMe}}
     <LinkTo @route="give.edit" @model={{@card.id}} class="edit">
-      <Icon @name="edit" style="fill: {{{@card.foregroundColor}}}" />
+      <Icon @name="edit" style="fill: {{{@card.foregroundColor}}}" alt="Edit" />
     </LinkTo>
 
     <button type="button" class="trash" {{on "click" this.trash}}>
-      <Icon @name="trash" style="fill: {{{@card.foregroundColor}}}" />
+      <Icon @name="trash" style="fill: {{{@card.foregroundColor}}}" alt="Trash" />
     </button>
   {{/if}}
 </article>

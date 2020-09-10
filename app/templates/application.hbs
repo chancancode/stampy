@@ -1,13 +1,3 @@
-<div id="app">
-  <nav>
-    <ul>
-      <li><LinkTo @route="redeem"><Icon @name="redeem" />Redeem</LinkTo></li>
-      <li><LinkTo @route="collect"><Icon @name="collect" />Collect</LinkTo></li>
-      <li><LinkTo @route="give"><Icon @name="give" />Give</LinkTo></li>
-      <li><LinkTo @route="account"><Icon @name="account" />Account</LinkTo></li>
-    </ul>
-  </nav>
-  <main>{{outlet}}</main>
-</div>
+{{outlet}}
 
 <SigninModal />

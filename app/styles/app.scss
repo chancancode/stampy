@@ -64,7 +64,7 @@ nav {
         }
       }
 
-      a.active:not(.ember-transitioning-out), a.loading, a.ember-transitioning-in {
+      a.active:not(.ember-transitioning-out), a.ember-transitioning-in {
         color: rgb(175, 30, 230);
 
         svg {
@@ -72,7 +72,7 @@ nav {
         }
       }
 
-      a.loading, a.ember-transitioning-in {
+      a.active:not(.ember-transitioning-out).refreshing, a.ember-transitioning-in {
         svg {
           animation-name: bounce;
           animation-duration: 1.5s;
@@ -529,6 +529,10 @@ a.placeholder-card {
 
     textarea {
       height: auto;
+    }
+
+    textarea:focus {
+      text-align: left;
     }
 
     input[type=color] {

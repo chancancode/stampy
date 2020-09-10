@@ -1,18 +1,20 @@
 import Route from '@ember/routing/route';
+import StampCard from 'stampy/models/stamp-card';
 
 export default class OpenRoute extends Route {
-  async model({ id }: { id: string }): Promise<void> {
+  async model({ id }: { id: string }): Promise<StampCard | void> {
     try {
-      let card = await this.store.findRecord('stamp-card', id);
-      let user = await this.store.queryRecord('user', { me: true });
-
-      if ((await card.from).id === user.id) {
-        this.transitionTo('give');
-      } else {
-        this.transitionTo('collect');
-      }
+      return await this.store.findRecord('stamp-card', id);
     } catch {
       this.transitionTo('import', { queryParams: { q: id } });
+    }
+  }
+
+  afterModel(card: StampCard): void {
+    if (card.isSentFromMe) {
+      this.transitionTo('give');
+    } else {
+      this.transitionTo('collect');
     }
   }
 }

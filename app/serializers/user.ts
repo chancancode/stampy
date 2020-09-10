@@ -21,7 +21,7 @@ export default class UserSerializer extends Serializer {
   normalizeResponse(
     _store: Store,
     _primaryModelClass: Model,
-    { gifted, received, ...user }: UserWithLinks,
+    { sent, received, ...user }: UserWithLinks,
     _id: string,
     requestType: string
   ): { data: NormalizedRecord } {
@@ -38,8 +38,8 @@ export default class UserSerializer extends Serializer {
         id: user.email,
         attributes,
         relationships: {
-          gifted: {
-            data: gifted
+          sent: {
+            data: sent
           },
           received: {
             data: received

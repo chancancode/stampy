@@ -2,17 +2,24 @@ import Route from '@ember/routing/route';
 import { inject as service } from '@ember/service';
 
 import SessionService from 'stampy/services/session';
+import User from 'stampy/models/user';
 
 export default class AuthenticatedRoute extends Route {
-  @service private session!: SessionService;
+  @service private declare session: SessionService;
 
   private returnTo?: string;
 
-  beforeModel(): void {
+  model(): User | void {
     if (this.session.currentUser === null) {
       this.returnTo = this.attemptedURL;
       this.transitionTo('signin');
-    } else if (this.returnTo) {
+    } else {
+      return this.session.currentUser;
+    }
+  }
+
+  afterModel(): void {
+    if (this.returnTo) {
       let { returnTo } = this;
       this.returnTo = undefined;
       this.replaceWith(returnTo);

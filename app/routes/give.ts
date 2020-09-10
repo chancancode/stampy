@@ -1,10 +1,17 @@
 import Route from '@ember/routing/route';
-import StampCard from 'stampy/models/stamp-card';
+import { onError } from 'stampy/app';
+import User from 'stampy/models/user';
 
 export default class GiveRoute extends Route {
-  async model(): Promise<StampCard[]> {
-    let user = await this.store.queryRecord('user', { me: true });
-    let model = await user.gifted;
-    return model.toArray();
+  model(): User {
+    return this.modelFor('authenticated') as User;
+  }
+
+  async afterModel(user: User): Promise<void> {
+    let promise = user.refreshGifted().catch(onError);
+
+    if (user.gifted.length === 0) {
+      await promise;
+    }
   }
 }

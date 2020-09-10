@@ -1,45 +1,47 @@
 import { attr, belongsTo } from '@ember-data/model';
-
-import { assert } from '@ember/debug';
+import { inject as service } from '@ember/service';
 
 import DS from 'ember-data';
 import SpreadsheetModel from './spreadsheet';
 import User from './user';
 import { sheet } from 'stampy/transforms/sheet';
+import SessionService from 'stampy/services/session';
 
 export default class StampCard extends SpreadsheetModel {
-  @attr() title!: string;
-  @attr() description!: string;
-  @attr() backgroundColor!: string;
-  @attr() foregroundColor!: string;
-  @attr() goal!: number;
-  @attr('date') expirationDate?: Date;
-  @attr() terms!: readonly string[];
+  @service declare session: SessionService;
+
+  @attr() declare title: string;
+  @attr() declare description: string;
+  @attr() declare backgroundColor: string;
+  @attr() declare foregroundColor: string;
+  @attr() declare goal: number;
+  @attr('date') declare expirationDate?: Date;
+  @attr() declare terms: readonly string[];
 
   @sheet(['Date', 'date'], ['Notes', 'string'])
-  stamps?: readonly [Date, string?][];
+  declare stamps?: readonly [Date, string?][];
 
-  @belongsTo('user', { inverse: 'gifted' }) from!: DS.PromiseObject<User>;
-  @belongsTo('user', { inverse: 'received' }) to!: DS.PromiseObject<User>;
+  @belongsTo('user', { inverse: 'sent' }) declare from: DS.PromiseObject<User>;
+  @belongsTo('user', { inverse: 'received' }) declare to: DS.PromiseObject<User>;
 
-  get slots(): readonly ([Date, string?] | undefined)[] {
-    let { goal, stamps } = this;
+  get isSentFromMe(): boolean {
+    return this.session.currentUser?.id === this.from.get('id');
+  }
 
-    stamps = stamps || [];
+  get isSentToMe(): boolean {
+    return !this.isSentFromMe;
+  }
 
-    assert(
-      `Too many stamps, expected ${goal}, got ${stamps.length}`,
-      goal >= stamps.length
-    );
-
-    let filled = stamps.map(([date, notes]) => ({ date, notes }));
-    let empty = new Array(goal - stamps.length);
-
-    return [...filled, ...empty];
+  get isCollecting(): boolean {
+    return !this.isComplete;
   }
 
   get isComplete(): boolean {
-    return !!this.stamps && this.stamps.length >= this.goal;
+    return this.filled >= this.goal;
+  }
+
+  get filled(): number {
+    return this.stamps?.length || 0;
   }
 }
 

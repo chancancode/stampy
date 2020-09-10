@@ -12,7 +12,7 @@ export default class App extends Application {
   Resolver = Resolver;
 }
 
-Ember.onerror = (error: unknown) => {
+export function onError(error: unknown): void {
   let details: string;
 
   if (typeof error === 'string') {
@@ -70,9 +70,10 @@ Ember.onerror = (error: unknown) => {
   }
 
   console.error(error);
-};
+}
 
-Ember.RSVP.on('error', Ember.onerror);
+Ember.onerror = onError;
+Ember.RSVP.on('error', onError);
 
 function isPartial<T extends {}>(error: unknown): error is Partial<T> {
   return error && typeof error === 'object';
