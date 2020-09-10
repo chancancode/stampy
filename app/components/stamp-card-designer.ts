@@ -90,7 +90,7 @@ const PLACEHOLDERS: Readonly<StampCardAttributes> = Object.freeze({
     'Void where prohibited.'
   ],
   emailAddress: 'jane@example.com',
-  emailMessage: 'Hey, I shared a stamp card for you!'
+  emailMessage: 'Hey, I shared a stamp card with you!'
 });
 
 export default class StampCardDesignerComponent extends Component<StampCardDesignerArgs> {
