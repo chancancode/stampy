@@ -7,6 +7,14 @@ import RSVP from 'rsvp';
 
 import { CreateSpreadsheet, UpdateSpreadsheet } from 'stampy/serializers/application';
 
+function timeout(amount: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, amount);
+  });
+}
+
+type Request<T> = gapi.client.Request<T>;
+type Response<T> = gapi.client.Response<T>;
 type Permission = gapi.client.drive.Permission;
 type User = gapi.client.drive.User;
 type File = gapi.client.drive.File;
@@ -51,6 +59,8 @@ export default class ApplicationAdapter extends Adapter {
   // The get API does not have this issue, so we keep a list of recently seen
   // IDs and suppliment the list response with these if needed.
   private recentlySeenIds: Set<string> = new Set();
+
+  private requests: Set<Request<unknown>> = new Set();
 
   findRecord<K extends keyof ModelRegistry>(
     _store: Store,
@@ -175,50 +185,56 @@ export default class ApplicationAdapter extends Adapter {
         }
       }
 
-      await gapi.client.drive.permissions.create({
-        fileId,
-        sendNotificationEmail,
-        emailMessage,
-        resource: {
-          type: 'user',
-          role: 'commenter',
-          emailAddress
-        }
-      });
+      await this.request(() =>
+        gapi.client.drive.permissions.create({
+          fileId,
+          sendNotificationEmail,
+          emailMessage,
+          resource: {
+            type: 'user',
+            role: 'commenter',
+            emailAddress
+          }
+        })
+      );
     }
 
     let parentId = (await this.findFileByQuery(FOLDER_Q))?.id;
 
     if (!parentId) {
-      let { result } = await gapi.client.drive.files.create({
-        fields: 'id',
-        resource: {
-          appProperties: {
-            root: 'true'
-          },
-          name: 'Stampy',
-          description: 'View on the Stampy app at https://stampy.netlify.app/give',
-          mimeType: 'application/vnd.google-apps.folder'
-        }
-      });
+      let { result } = await this.request(() =>
+        gapi.client.drive.files.create({
+          fields: 'id',
+          resource: {
+            appProperties: {
+              root: 'true'
+            },
+            name: 'Stampy',
+            description: 'View on the Stampy app at https://stampy.netlify.app/give',
+            mimeType: 'application/vnd.google-apps.folder'
+          }
+        })
+      );
 
       assert('Missing id in File', result.id);
 
       parentId = result.id;
     }
 
-    let { result: file } = await gapi.client.drive.files.update({
-      fileId,
-      fields: 'id, appProperties, ownedByMe, permissions, sharingUser',
-      addParents: parentId,
-      resource: {
-        appProperties: {
-          model: 'true',
-          type: snapshot.modelName
-        },
-        description
-      }
-    });
+    let { result: file } = await this.request(() =>
+      gapi.client.drive.files.update({
+        fileId,
+        fields: 'id, appProperties, ownedByMe, permissions, sharingUser',
+        addParents: parentId,
+        resource: {
+          appProperties: {
+            model: 'true',
+            type: snapshot.modelName
+          },
+          description
+        }
+      })
+    );
 
     this.recentlySeenIds.add(fileId);
 
@@ -244,10 +260,12 @@ export default class ApplicationAdapter extends Adapter {
   }
 
   private async findFileById(fileId: string, validate = true): Promise<RecordFile> {
-    let { result: file, body } = await gapi.client.drive.files.get({
-      fileId,
-      fields: 'id, appProperties, mimeType, trashed, ownedByMe, permissions, sharingUser'
-    });
+    let { result: file, body } = await this.request(() =>
+      gapi.client.drive.files.get({
+       fileId,
+        fields: 'id, appProperties, mimeType, trashed, ownedByMe, permissions, sharingUser'
+      })
+    );
 
     if (validate) {
       assert(`Invalid file:\n${body}`, isValidFile(file));
@@ -263,13 +281,15 @@ export default class ApplicationAdapter extends Adapter {
 
   // used by user adapter
   async listFiles(q: string = SPREADSHEET_Q, pageToken?: string): Promise<RecordFile[]> {
-    let { result } = await gapi.client.drive.files.list({
-      corpora: 'user',
-      fields: 'nextPageToken, files(id, appProperties, mimeType, trashed, ownedByMe, permissions, sharingUser)',
-      pageSize: 1000,
-      pageToken,
-      q
-    });
+    let { result } = await this.request(() =>
+      gapi.client.drive.files.list({
+        corpora: 'user',
+        fields: 'nextPageToken, files(id, appProperties, mimeType, trashed, ownedByMe, permissions, sharingUser)',
+        pageSize: 1000,
+        pageToken,
+        q
+      })
+    );
 
     let files = result.files as RecordFile[] || [];
 
@@ -303,24 +323,31 @@ export default class ApplicationAdapter extends Adapter {
   }
 
   private async deleteFile(fileId: string): Promise<void> {
-    await gapi.client.drive.files.update({ fileId, resource: { trashed: true } });
+    await this.request(() =>
+      gapi.client.drive.files.update({ fileId, resource: { trashed: true } })
+    );
+
     this.recentlySeenIds.delete(fileId);
   }
 
   private async findSpreadsheet(id: string): Promise<Spreadsheet> {
-    let { result: spreadsheet } = await gapi.client.sheets.spreadsheets.get({
-      spreadsheetId: id,
-      includeGridData: true,
-    });
+    let { result: spreadsheet } = await this.request(() =>
+      gapi.client.sheets.spreadsheets.get({
+        spreadsheetId: id,
+        includeGridData: true,
+      })
+    );
 
     return spreadsheet;
   }
 
   private async createSpreadsheet(resource: CreateSpreadsheet): Promise<Spreadsheet> {
-    let { result: { spreadsheetId } } = await gapi.client.sheets.spreadsheets.create({
-      fields: 'spreadsheetId',
-      resource
-    });
+    let { result: { spreadsheetId } } = await this.request(() =>
+      gapi.client.sheets.spreadsheets.create({
+        fields: 'spreadsheetId',
+        resource
+      })
+    );
 
     assert('spreadsheetId missing', spreadsheetId);
 
@@ -329,16 +356,50 @@ export default class ApplicationAdapter extends Adapter {
   }
 
   private async updateSpreadsheet({ spreadsheetId, requests }: UpdateSpreadsheet): Promise<Spreadsheet> {
-    let { result } = await gapi.client.sheets.spreadsheets.batchUpdate({
-      spreadsheetId,
-      resource: {
-        requests,
-        includeSpreadsheetInResponse: true,
-        responseIncludeGridData: true
-      }
-    });
+    let { result } = await this.request(() =>
+      gapi.client.sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        resource: {
+          requests,
+          includeSpreadsheetInResponse: true,
+          responseIncludeGridData: true
+        }
+      })
+    );
 
     return result.updatedSpreadsheet!;
+  }
+
+  private async request<T>(callback: () => Request<T>, retries = 5): Promise<Response<T>> {
+    while (this.requests.size > 10) {
+      try {
+        await Promise.race(this.requests);
+      } catch {
+        // ignore
+      }
+    }
+
+    let request = callback();
+
+    this.requests.add(request);
+
+    try {
+      return await request;
+    } catch(error) {
+      if (retries > 1 && error?.status === 429) {
+        let delay = Math.round(1000 + Math.random() * (Math.pow(100, 1 / retries) - 1) * 1000);
+        console.log(`429 Rate Limited: ${retries - 1} retries left, trying again in ${delay}ms`);
+        await timeout(delay);
+        return this.request(callback, retries - 1);
+      } else {
+        if (error?.status === 429) {
+          console.warn('Giving up');
+        }
+        throw error;
+      }
+    } finally {
+      this.requests.delete(request);
+    }
   }
 }
 
