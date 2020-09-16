@@ -188,6 +188,7 @@ main {
   position: relative;
   padding: 16px;
   border-radius: 5px;
+  isolation: isolate;
 
   display: grid;
   align-content: center;
@@ -283,6 +284,7 @@ main {
       background: rgba(255,255,255,0.5);
       padding: 100% 100% 0 0;
       mix-blend-mode: soft-light;
+      pointer-events: none;
     }
 
     &.small {
