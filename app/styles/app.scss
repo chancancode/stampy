@@ -76,7 +76,6 @@ nav {
         svg {
           animation-name: bounce;
           animation-duration: 1.5s;
-          animation-delay: 0.25s;
           animation-iteration-count: infinite;
           animation-timing-function: cubic-bezier(0.280, 0.840, 0.420, 1);
           transform-origin: bottom;
@@ -97,6 +96,7 @@ nav {
 }
 
 main {
+  position: relative;
   grid-row: 1 / 2;
   background: rgba(255,255,255,0.6);
   padding: 16px;
@@ -139,7 +139,7 @@ main {
   grid-auto-columns: max-content;
   gap: 0px 16px;
 
-  padding: 16px 32px;
+  padding: 16px 24px;
   background: rgba(250, 235, 255, 0.8);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
@@ -235,6 +235,27 @@ main {
       left: 5%;
     }
 
+    li button {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      margin: 0px;
+      padding: 0px;
+      font-size: 0;
+      border: none;
+      border-radius: 100%;
+      background: none;
+      cursor: pointer;
+    }
+
+    li button:disabled {
+      cursor: default;
+    }
+
     li:before {
       display: grid;
       place-content: center;
@@ -311,8 +332,7 @@ main {
     }
   }
 
-
-  .edit, .trash {
+  .edit, .delete {
     position: absolute;
     box-sizing: content-box;
     top: 8px;
@@ -340,14 +360,63 @@ main {
   }
 
   &.inert {
-    .edit, .trash {
+    .edit, .delete {
       display: none;
     }
   }
 
   &:hover, &:focus {
-    .edit, .trash {
+    .edit, .delete {
       opacity: 1;
+    }
+  }
+
+  .context-menu {
+    position: absolute;
+    z-index: 9999;
+    list-style: none;
+    text-align: left;
+
+    margin: 8px 0px;
+    background-color: rgba(250, 235, 255, 0.8);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    border-radius: 8px;
+    color: black;
+
+    li {
+      display: grid;
+      align-items: center;
+      justify-items: left;
+      min-width: 200px;
+      max-width: 280px;
+      height: 28px;
+      padding: 8px 16px;
+      border-bottom: 1px solid #bababa;
+      font-family: 'Lato', sans-serif;
+      font-weight: 400;
+      cursor: pointer;
+
+      svg {
+        justify-self: right;
+        padding-left: 16px;
+        grid-column: 2;
+        grid-row: 1 / -1;
+        width: 24px;
+        height: 24px;
+        fill: black;
+      }
+
+      &.dangerous {
+        color: red;
+        svg {
+          fill: red;
+        }
+      }
+    }
+
+    li:last-child {
+      border: none;
     }
   }
 }

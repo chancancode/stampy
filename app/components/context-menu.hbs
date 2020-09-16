@@ -1,0 +1,46 @@
+<button
+  type="button"
+  id="{{this.id}}-button"
+  aria-haspopup="true"
+  aria-controls={{this.menu.id}}
+  aria-expanded="{{this.isOpen}}"
+  disabled={{eq this.items.length 0}}
+  {{on "click" this.open}}
+  {{on "keydown" this.onButtonKeyDown}}
+  {{on "mousedown" this.onButtonMouseDown}}
+>
+  Context menu for {{@description}}
+</button>
+
+{{#if this.isOpen}}
+  {{#in-element this.parent insertBefore=null}}
+    {{on-document "keydown" this.onDocumentKeyDown}}
+    {{on-window "resize" this.position}}
+    {{on this.scroll "scroll" this.position}}
+
+    <ul
+      id="{{this.id}}-menu"
+      class="context-menu"
+      tabindex="-1"
+      role="menu"
+      aria-labelledby={{this.button.id}}
+      {{did-insert this.didOpen}}
+      {{on "blur" this.close}}
+    >
+      {{#each @items as |item idx|}}
+        <li
+          role="menuitem"
+          tabindex="-1"
+          class="{{if item.dangerous "dangerous"}}"
+          {{on "click" item.callback}}
+        >
+          <Icon @name={{item.icon}} alt="" />
+          <span class="label">{{item.label}}</span>
+          {{#if item.description}}
+            <span class="description">{{item.description}}</span>
+          {{/if}}
+        </li>
+      {{/each}}
+    </ul>
+  {{/in-element}}
+{{/if}}

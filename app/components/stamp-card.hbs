@@ -1,5 +1,5 @@
 <article
-  class="stamp-card"
+  class="stamp-card {{if @inert "inert"}}"
   style="background: {{{@card.backgroundColor}}}; color: {{{@card.foregroundColor}}}"
   ...attributes
 >
@@ -8,18 +8,23 @@
   {{#let this.slots as |slots|}}
     <p class="stamps {{this.size}}">
       <ol>
-        {{#each slots as |slot|}}
-          {{#if slot.filled}}
-            <li class="filled">
+        {{#each slots as |slot i|}}
+          <li>
+            {{#if slot.filled}}
               <Icon
-                @name="collect"
+                @name="stamp"
                 fill={{@card.foregroundColor}}
                 alt="Stamp"
               />
-            </li>
-          {{else}}
-            <li />
-          {{/if}}
+            {{/if}}
+            {{#unless @inert}}
+              <ContextMenu
+                @parent="article"
+                @description="Slot {{i}}"
+                @items={{slot.items}}
+              />
+            {{/unless}}
+          </li>
         {{/each}}
       </ol>
     </p>
@@ -40,11 +45,11 @@
 
   {{#if @card.isSentFromMe}}
     <LinkTo @route="give.edit" @model={{@card.id}} class="edit">
-      <Icon @name="edit" style="fill: {{{@card.foregroundColor}}}" alt="Edit" />
+      <Icon @name="edit" style="fill: {{{@card.foregroundColor}}}" alt="Edit Card" />
     </LinkTo>
 
-    <button type="button" class="trash" {{on "click" this.trash}}>
-      <Icon @name="trash" style="fill: {{{@card.foregroundColor}}}" alt="Trash" />
+    <button type="button" class="delete" {{on "click" this.delete}}>
+      <Icon @name="delete" style="fill: {{{@card.foregroundColor}}}" alt="Delete Card" />
     </button>
   {{/if}}
 </article>
