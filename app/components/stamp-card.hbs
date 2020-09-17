@@ -9,7 +9,7 @@
     <p class="stamps {{this.size}}">
       <ol>
         {{#each slots as |slot i|}}
-          <li>
+          <li style="background: {{{this.stampBackgroundColor}}}">
             {{#if slot.filled}}
               <Icon
                 @name="stamp"

@@ -40,6 +40,7 @@
     "@types/rsvp": "^4.0.3",
     "babel-eslint": "^10.1.0",
     "broccoli-asset-rev": "^3.0.0",
+    "color-blend": "^3.0.0",
     "ember-auto-import": "^1.6.0",
     "ember-cli": "~3.20.0",
     "ember-cli-app-version": "^3.2.0",

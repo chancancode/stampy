@@ -1,8 +1,12 @@
 import Route from '@ember/routing/route';
+import { assert } from '@ember/debug';
 import config from 'stampy/config/environment';
 
 export default class ApplicationRoute extends Route {
   async beforeModel(): Promise<void> {
+    assert('Missing GOOGLE_API_KEY', config.GOOGLE_API_KEY);
+    assert('Missing GOOGLE_CLIENT_ID', config.GOOGLE_CLIENT_ID);
+
     await window.scripts.platform;
 
     await new Promise(resolve => {

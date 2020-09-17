@@ -2,6 +2,8 @@ import Component from '@glimmer/component';
 
 import { action } from '@ember/object';
 
+import { softLight } from 'color-blend';
+
 import { onError } from 'stampy/app';
 import StampCard from 'stampy/models/stamp-card';
 import { ContextMenuItem } from 'stampy/components/context-menu';
@@ -75,6 +77,37 @@ export default class StampCardComponent extends Component<StampCardArgs> {
     }
 
     return slots;
+  }
+
+  // Chrome's native CSS blending is very slow for some reason
+  get stampBackgroundColor(): string {
+    let hex = this.card.backgroundColor || '#000000';
+
+    let background = {
+      r: parseInt(hex.slice(1, 3), 16) || 0,
+      g: parseInt(hex.slice(3, 5), 16) || 0,
+      b: parseInt(hex.slice(5, 7), 16) || 0,
+      a: 1
+    };
+
+    let foreground = {
+      r: 255,
+      g: 255,
+      b: 255,
+      a: 0.5
+    };
+
+    let { r, g, b, a } = softLight(background, foreground);
+
+    return `rgba(${
+      r.toFixed(0)
+    }, ${
+      g.toFixed(0)
+    }, ${
+      b.toFixed(0)
+    }, ${
+      a.toFixed(2)
+    })`;
   }
 
   @action delete(): void {

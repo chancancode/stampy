@@ -188,7 +188,6 @@ main {
   position: relative;
   padding: 16px;
   border-radius: 5px;
-  isolation: isolate;
 
   display: grid;
   align-content: center;
@@ -225,7 +224,8 @@ main {
     li {
       display: block;
       position: relative;
-      overflow: hidden;
+      border-radius: 100%;
+      padding: 100% 100% 0 0;
     }
 
     li svg {
@@ -264,6 +264,10 @@ main {
       position: absolute;
       width: 100%;
       height: 100%;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
 
       counter-increment: number;
       content: counter(number);
@@ -275,17 +279,16 @@ main {
       opacity: 0.25;
     }
 
-    li:after {
-      display: block;
+    // li:after {
+    //   display: block;
 
-      content: "";
+    //   content: "";
 
-      border-radius: 100%;
-      background: rgba(255,255,255,0.5);
-      padding: 100% 100% 0 0;
-      mix-blend-mode: soft-light;
-      pointer-events: none;
-    }
+    //   border-radius: 100%;
+    //   background: rgba(255,255,255,0.5);
+    //   padding: 100% 100% 0 0;
+    //   pointer-events: none;
+    // }
 
     &.small {
       ol {
