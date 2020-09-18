@@ -279,6 +279,8 @@ main {
   position: relative;
   padding: 16px;
   border-radius: 5px;
+  max-width: 380px;
+  justify-self: center;
 
   display: grid;
   align-content: center;
@@ -589,6 +591,10 @@ a.placeholder-card {
     }
   }
 
+  .card-preview {
+    justify-self: center;
+  }
+
   .card-fields {
     background: rgb(245, 245, 245);
     border-radius: 4px;
@@ -610,12 +616,26 @@ a.placeholder-card {
     label {
       display: grid;
       grid-template-columns: max-content 1fr;
+      background: rgb(245, 245, 245);
+      border-top: 1px solid #dedede;
+      margin: 0px;
       padding: 8px;
+      max-height: 317px;
+      overflow: hidden;
+      box-sizing: border-box;
+      transform: translateZ(1px);
+      z-index: 1;
       font-weight: 400;
-      border-bottom: 1px solid #dedede;
 
-      &:last-child {
-        border-bottom: none;
+      transition: all 0.25s ease-in-out;
+
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+
+      &:first-of-type {
+        border-top: 0px;
       }
 
       &:focus-within {
@@ -623,6 +643,13 @@ a.placeholder-card {
       }
 
       &.disabled {
+        pointer-events: none;
+        transform: translateZ(-1px);
+        z-index: -1;
+        opacity: 0;
+        margin-top: -1px;
+        padding: 0px 8px;
+        max-height: 0px;
         color: rgba(0, 0, 0, 0.3);
       }
     }
@@ -636,6 +663,8 @@ a.placeholder-card {
       padding-right: 8px;
       border: none;
       background: transparent;
+
+      transition: all 0.25s ease-in-out;
 
       &:focus {
         outline:none;
@@ -664,6 +693,7 @@ a.placeholder-card {
 
     textarea {
       height: auto;
+      max-height: 300px;
     }
 
     textarea:focus {

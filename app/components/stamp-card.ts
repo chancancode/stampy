@@ -1,5 +1,6 @@
 import Component from '@glimmer/component';
 
+import { assert } from '@ember/debug';
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 
@@ -56,14 +57,14 @@ export default class StampCardComponent extends Component<StampCardArgs> {
           actions.push({
             label: 'Edit Note',
             icon: 'note',
-            callback: () => alert('Edit Note')
+            callback: () => this.editNote(i)
           });
 
           actions.push({
             label: 'Remove Stamp',
             icon: 'trash',
             dangerous: true,
-            callback: () => alert('Remove Stamp')
+            callback: () => this.removeStamp(i)
           });
         }
 
@@ -71,7 +72,7 @@ export default class StampCardComponent extends Component<StampCardArgs> {
           actions.push({
             label: 'Give Stamp',
             icon: 'check',
-            callback: () => alert('Give Stamp')
+            callback: this.giveStamp
           });
         }
 
@@ -79,7 +80,7 @@ export default class StampCardComponent extends Component<StampCardArgs> {
           actions.push({
             label: 'Request Stamp',
             icon: 'bubble-check',
-            callback: () => alert('Request Stamp')
+            callback: this.requestStamp
           });
         }
       }
@@ -141,6 +142,62 @@ export default class StampCardComponent extends Component<StampCardArgs> {
 
     return actions;
   }
+
+  @action editNote(index: number): void {
+    let { stamps } = this.card;
+
+    let stamp = stamps[index];
+    assert('Stamp missing', stamp);
+
+    let note = prompt('Edit note', stamp.note);
+
+    if (note !== null) {
+      this.card.stamps = [
+        ...stamps.slice(0, index),
+        {
+          date: new Date(),
+          note: note || undefined
+        },
+        ...stamps.slice(index + 1)
+      ];
+
+      this.card.save().catch(onError);
+    }
+  }
+
+  @action giveStamp(): void {;
+    let note = prompt('Add a note?');
+
+    if (note !== null) {
+      this.card.stamps = [
+        ...this.card.stamps,
+        {
+          date: new Date(),
+          note: note || undefined
+        }
+      ];
+
+      this.card.save().catch(onError);
+    }
+  }
+
+  @action removeStamp(index: number): void {
+    if (confirm('Are you sure?')) {
+      let { stamps } = this.card;
+
+      this.card.stamps = [
+        ...stamps.slice(0, index),
+        ...stamps.slice(index + 1)
+      ];
+
+      this.card.save().catch(onError);
+    }
+  }
+
+  @action requestStamp(): void {
+    alert('This feature is not yet implemented, stay tuned!');
+  }
+
 
   @action editCard(): void {
     this.router.transitionTo('give.edit', this.card.id);
