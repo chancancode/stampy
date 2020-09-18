@@ -8,3 +8,7 @@ declare module 'stampy/templates/*' {
 interface Window {
   scripts: Record<string, Promise<Event>>;
 }
+
+interface HTMLElement {
+  inert: boolean;
+}

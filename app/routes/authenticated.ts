@@ -7,22 +7,13 @@ import User from 'stampy/models/user';
 export default class AuthenticatedRoute extends Route {
   @service private declare session: SessionService;
 
-  private returnTo?: string;
-
   model(): User | void {
     if (this.session.currentUser === null) {
-      this.returnTo = this.attemptedURL;
-      this.transitionTo('signin');
+      this.transitionTo('signin', {
+        queryParams: { return: this.attemptedURL }
+      });
     } else {
       return this.session.currentUser;
-    }
-  }
-
-  afterModel(): void {
-    if (this.returnTo) {
-      let { returnTo } = this;
-      this.returnTo = undefined;
-      this.replaceWith(returnTo);
     }
   }
 

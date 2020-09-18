@@ -21,7 +21,7 @@
               <ContextMenu
                 @parent="article"
                 @description="Slot {{i}}"
-                @items={{slot.items}}
+                @actions={{slot.actions}}
               />
             {{/unless}}
           </li>
@@ -43,13 +43,16 @@
     </p>
   {{/if}}
 
-  {{#if @card.isSentFromMe}}
-    <LinkTo @route="give.edit" @model={{@card.id}} class="edit">
-      <Icon @name="edit" style="fill: {{{@card.foregroundColor}}}" alt="Edit Card" />
-    </LinkTo>
-
-    <button type="button" class="delete" {{on "click" this.delete}}>
-      <Icon @name="delete" style="fill: {{{@card.foregroundColor}}}" alt="Delete Card" />
-    </button>
-  {{/if}}
+  <ContextMenu
+    @parent="article"
+    @description={{@card.title}}
+    @actions={{this.cardActions}}
+    style="background: {{{@card.foregroundColor}}}"
+  >
+    <Icon
+      @name="ellipsis"
+      fill={{@card.backgroundColor}}
+      alt=""
+    />
+  </ContextMenu>
 </article>

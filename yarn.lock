@@ -7052,6 +7052,11 @@ indexof@0.0.1:
   resolved "https://registry.yarnpkg.com/indexof/-/indexof-0.0.1.tgz#82dc336d232b9062179d05ab3293a66059fd435d"
   integrity sha1-gtwzbSMrkGIXnQWrMpOmYFn9Q10=
 
+inert-polyfill@^0.2.5:
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/inert-polyfill/-/inert-polyfill-0.2.5.tgz#16fb7280d3acc6b5314ce4b1af3418cb0d273c1e"
+  integrity sha512-on1Nri2CciTI8hc+BaIGCe1pDO3Qzniivt9HALcse/NGvUvu/4t2uh6REwOU5fx/Nsb5c3dCRPJdvinYH0mlkg==
+
 infer-owner@^1.0.3:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/infer-owner/-/infer-owner-1.0.4.tgz#c4cefcaa8e51051c2a40ba2ce8a3d27295af9467"

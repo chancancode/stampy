@@ -3,7 +3,7 @@ import { tracked } from '@glimmer/tracking';
 import { assert } from '@ember/debug';
 import { action } from '@ember/object';
 
-export interface ContextMenuItem {
+export interface ContextMenuAction {
   label: string;
   description?: string;
   icon: string;
@@ -14,7 +14,7 @@ export interface ContextMenuItem {
 interface ContextMenuArgs {
   parent?: string;
   description: string;
-  items: unknown[];
+  actions: ContextMenuAction[];
 }
 
 enum Justify {
@@ -51,12 +51,20 @@ export default class ContextMenuComponent extends Component<ContextMenuArgs> {
   @tracked scroll: HTMLElement | null = null;
   @tracked button: HTMLButtonElement | null = null;
   @tracked menu: HTMLUListElement | null = null;
-  @tracked selectedIndex: number = 0;
+  @tracked focusIndex: number = 0;
 
   ignoreNextClick = false;
 
-  get items(): unknown[] {
-    return this.args.items;
+  get actionItems(): ContextMenuAction[] {
+    return this.args.actions;
+  }
+
+  get hasActions(): boolean {
+    return !!(this.actionItems?.length);
+  }
+
+  get disabled(): boolean {
+    return !this.hasActions;
   }
 
   @action open(event: Event): void {
@@ -65,7 +73,7 @@ export default class ContextMenuComponent extends Component<ContextMenuArgs> {
       return;
     }
 
-    let button = event.target as HTMLButtonElement;
+    let button = (event.target as HTMLElement).closest('button') as HTMLButtonElement;
 
     this.isOpen = true;
     this.parent = button.closest(this.args.parent || 'body');
@@ -79,6 +87,7 @@ export default class ContextMenuComponent extends Component<ContextMenuArgs> {
     this.scroll = null;
     this.button = null;
     this.menu = null;
+    this.focusIndex = 0;
   }
 
   @action position(): void {
@@ -143,14 +152,26 @@ export default class ContextMenuComponent extends Component<ContextMenuArgs> {
         menu.style.bottom = 'auto';
         break;
     }
-
-    console.log({ justify, align });
   }
 
   @action didOpen(element: HTMLUListElement): void {
-    element.focus();
     this.menu = element;
     this.position();
+    this.moveFocus();
+  }
+
+  @action moveFocus(index = this.focusIndex): void {
+    this.focusIndex = index;
+    let element = this.menu?.querySelector(`li:nth-child(${index + 1})`);
+    (element as HTMLElement | null)?.focus();
+  }
+
+  @action moveFocusUp(): void {
+    this.moveFocus((this.focusIndex + 1) % this.actionItems.length);
+  }
+
+  @action moveFocusDown(): void {
+    this.moveFocus((this.actionItems.length + this.focusIndex - 1) % this.actionItems.length);
   }
 
   @action onButtonKeyDown(event: KeyboardEvent): void {
@@ -158,14 +179,15 @@ export default class ContextMenuComponent extends Component<ContextMenuArgs> {
 
     if (event.key === 'ArrowUp') {
       shouldHandle = true;
-      this.selectedIndex = this.items.length - 1;
+      this.focusIndex = this.actionItems.length - 1;
     } else if (event.key === 'ArrowDown') {
       shouldHandle = true;
-      this.selectedIndex = 0;
+      this.focusIndex = 0;
     }
 
     if (shouldHandle) {
       event.preventDefault();
+      event.stopPropagation();
       this.open(event);
     }
   }
@@ -185,6 +207,20 @@ export default class ContextMenuComponent extends Component<ContextMenuArgs> {
     } else if (event.key === 'Tab') {
       // Restore focus so the browser can move it to the next focusable element
       this.button?.focus();
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.moveFocusUp();
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.moveFocusDown();
+    }
+  }
+
+  @action onDocumentFocusOut(event: FocusEvent): void {
+    if (this.menu && !(
+      event.relatedTarget && this.menu.contains(event.relatedTarget as HTMLElement)
+    )) {
+      this.close();
     }
   }
 }

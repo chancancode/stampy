@@ -1,27 +1,25 @@
-<div id="app">
-  <nav>
-    <ul>
-      <li>
-        <LinkTo @route="redeem" class={{if @model.isRefreshingRedeemable 'refreshing'}}>
-          <Icon @name="redeem" alt="" /> Redeem
-        </LinkTo>
-      </li>
-      <li>
-        <LinkTo @route="collect" class={{if @model.isRefreshingCollectable 'refreshing'}}>
-          <Icon @name="stamp" alt="" /> Collect
-        </LinkTo>
-      </li>
-      <li>
-        <LinkTo @route="give" class={{if @model.isRefreshingGifted 'refreshing'}}>
-          <Icon @name="give" alt="" /> Give
-        </LinkTo>
-      </li>
-      <li>
-        <LinkTo @route="account">
-          <Icon @name="account" alt="" /> Account
-        </LinkTo>
-      </li>
-    </ul>
-  </nav>
-  <main>{{outlet}}</main>
-</div>
+<nav>
+  <ul>
+    <li>
+      <LinkTo @route="redeem" class={{if @model.isRefreshingRedeemable 'refreshing'}}>
+        <Icon @name="redeem" alt="" /> Redeem
+      </LinkTo>
+    </li>
+    <li>
+      <LinkTo @route="collect" class={{if @model.isRefreshingCollectable 'refreshing'}}>
+        <Icon @name="stamp" alt="" /> Collect
+      </LinkTo>
+    </li>
+    <li>
+      <LinkTo @route="give" class={{if @model.isRefreshingGifted 'refreshing'}}>
+        <Icon @name="give" alt="" /> Give
+      </LinkTo>
+    </li>
+    <li>
+      <LinkTo @route="account">
+        <Icon @name="account" alt="" /> Account
+      </LinkTo>
+    </li>
+  </ul>
+</nav>
+<main>{{outlet}}</main>

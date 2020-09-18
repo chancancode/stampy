@@ -2,9 +2,9 @@ import Ember from 'ember';
 import Application from '@ember/application';
 import Resolver from 'ember-resolver';
 import loadInitializers from 'ember-load-initializers';
+import 'inert-polyfill';
 
 import config from 'stampy/config/environment';
-import { animateIn } from 'stampy/modifiers/animate';
 
 export default class App extends Application {
   modulePrefix = config.modulePrefix;
@@ -57,16 +57,24 @@ export function onError(error: unknown): void {
     }
   }
 
-  let errorDetails = document.getElementById('error-details');
+  let errorDetails = document.getElementById('error-details') as HTMLTextAreaElement | null;
 
   if (errorDetails) {
-    errorDetails.innerText = details;
+    errorDetails.value = details;
   }
 
-  let errorModal = document.getElementById('error-modal');
+  const errorModal = document.getElementById('error-modal');
 
   if (errorModal) {
-    animateIn(errorModal);
+    errorModal.setAttribute('style', '');
+    setTimeout(() => errorModal.classList.add('show'), 0);
+
+    let app = document.getElementById('app');
+
+    if (app) {
+      app.inert = true;
+      app.setAttribute('aria-hidden', 'true');
+    }
   }
 
   console.error(error);

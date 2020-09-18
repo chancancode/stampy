@@ -1,5 +1,5 @@
-<div class="card-designer full-page-modal" {{animate this.isShown}}>
-  <form {{on "submit" this.submit}}>
+<Modal class="card-designer">
+  <form class="modal-dialog" {{on "submit" this.submit}}>
     <h1>
       {{#if this.isNew}}
         New Card
@@ -79,18 +79,16 @@
           />
         </label>
 
-        {{#if this.expires}}
-          <label>
-            Expiration Date
-            <Input
-              @type="date"
-              @value={{this.expirationDateValue}}
-              placeholder={{this.expirationDatePlaceholderValue}}
-              disabled={{this.isSubmitting}}
-              required
-            />
-          </label>
-        {{/if}}
+        <label class={{unless this.expires "disabled"}}>
+          Expiration Date
+          <Input
+            @type="date"
+            @value={{this.expirationDateValue}}
+            placeholder={{this.expirationDatePlaceholderValue}}
+            disabled={{or (not this.expires) this.isSubmitting}}
+            required
+          />
+        </label>
 
         <label>
           Terms
@@ -123,17 +121,15 @@
             />
           </label>
 
-          {{#if this.sendNotificationEmail}}
-            <label>
-              Email Message
-              <Textarea
-                @value={{this.emailMessage}}
-                placeholder={{this.placeholders.emailMessage}}
-                disabled={{this.isSubmitting}}
-                {{auto-resize}}
-              />
-            </label>
-          {{/if}}
+          <label class={{unless this.sendNotificationEmail "disabled"}}>
+            Email Message
+            <Textarea
+              @value={{this.emailMessage}}
+              placeholder={{this.placeholders.emailMessage}}
+              disabled={{or (not this.sendNotificationEmail) this.isSubmitting}}
+              {{auto-resize}}
+            />
+          </label>
         {{/if}}
       </div>
     </div>
@@ -159,4 +155,4 @@
       Cancel
     </button>
   </form>
-</div>
+</Modal>

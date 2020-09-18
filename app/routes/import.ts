@@ -3,6 +3,7 @@ import { assert } from '@ember/debug';
 import { inject as service } from '@ember/service';
 
 import config from 'stampy/config/environment';
+import ApplicationController from 'stampy/controllers/application';
 import SessionService from 'stampy/services/session';
 
 export default class ImportRoute extends Route {
@@ -14,6 +15,9 @@ export default class ImportRoute extends Route {
   };
 
   async model(params: { q?: string, return?: string }): Promise<void> {
+    let controller = this.controllerFor('application') as ApplicationController;
+    controller.inert = true;
+
     let token = this.session.token;
     assert('Missing OAuth token', token);
 
@@ -44,6 +48,8 @@ export default class ImportRoute extends Route {
     picker.setVisible(true);
 
     let ids = await promise;
+
+    controller.inert = false;
 
     for (let id of ids) {
       try {

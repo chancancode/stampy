@@ -13,6 +13,7 @@ import { inject as service } from '@ember/service';
 
 import SessionService from 'stampy/services/session';
 import { AdapterRecord as AdapterRecord } from 'stampy/adapters/application';
+import Ember from 'ember';
 
 type Spreadsheet = gapi.client.sheets.Spreadsheet;
 type Properties = gapi.client.sheets.SpreadsheetProperties;
@@ -161,14 +162,18 @@ export default class ApplicationSerializer extends Serializer {
 
     // https://github.com/typed-ember/ember-cli-typescript/issues/1296
     let model = store.modelFor(type) as unknown as typeof Model;
+    let meta = get(model, 'attributes');
 
     model.eachTransformedAttribute((name, type) => {
       if (type === 'sheet') {
-        attributes[name] = this.deserializeRowData(this.findSheet(spreadsheet, name));
+        let { options } = meta.get(name);
+        let sheetName = options.name || name;
+
+        attributes[name] = this.deserializeRowData(this.findSheet(spreadsheet, sheetName));
       }
     });
 
-    this.applyTransforms(model, attributes, 'deserialize');
+    this.applyTransforms(model, attributes, 'deserialize', meta);
 
     let from: Link;
     let to: Link;
@@ -260,20 +265,21 @@ export default class ApplicationSerializer extends Serializer {
   private applyTransforms<ModelClass extends typeof Model>(
     model: ModelClass,
     attributes: Record<string, unknown>,
-    mode: 'serialize' | 'deserialize'
+    mode: 'serialize' | 'deserialize',
+    meta: Ember.Map
   ): void;
   private applyTransforms<ModelClass extends typeof Model>(
     model: ModelClass,
     attributes: Record<string, [unknown, unknown]>,
-    mode: 'serialize-changed'
+    mode: 'serialize-changed',
+    meta: Ember.Map
   ): void;
   private applyTransforms<ModelClass extends typeof Model>(
     model: ModelClass,
     attributes: Record<string, unknown>,
-    mode: 'serialize' | 'serialize-changed' | 'deserialize'
+    mode: 'serialize' | 'serialize-changed' | 'deserialize',
+    meta: Ember.Map
   ): void {
-    let meta = get(model, 'attributes');
-
     model.eachTransformedAttribute((key, transformType) => {
       let k = key as string;
       let transform = this.transformFor(transformType);
@@ -308,19 +314,23 @@ export default class ApplicationSerializer extends Serializer {
 
     // https://github.com/typed-ember/ember-cli-typescript/issues/1296
     let model = snapshot.type as unknown as typeof Model;
+    let meta = get(model, 'attributes');
     let attributes: Record<string, unknown> = snapshot.attributes();
 
     delete attributes.spreadsheet;
 
-    this.applyTransforms(model, attributes, 'serialize');
+    this.applyTransforms(model, attributes, 'serialize', meta);
 
     model.eachTransformedAttribute((name, type) => {
       if (type === 'sheet') {
+        let { options } = meta.get(name);
+        let sheetName = options.name || name;
+
         if (name in attributes) {
           let data = attributes[name];
 
           if (Array.isArray(data)) {
-            sheets.push(this.serializeSheet(name, data));
+            sheets.push(this.serializeSheet(sheetName, data));
           }
 
           delete attributes[name];
@@ -352,19 +362,22 @@ export default class ApplicationSerializer extends Serializer {
     assert('missing spreadsheet attribute', spreadsheet);
 
     let model = snapshot.type as unknown as typeof Model;
+    let meta = get(model, 'attributes');
     let attributes = snapshot.changedAttributes() as unknown as Record<string, [unknown, unknown]>;
 
     assert('spreadsheet is readonly', !('spreadsheet' in attributes));
     delete attributes.spreadsheet;
 
-    this.applyTransforms(model, attributes, 'serialize-changed');
+    this.applyTransforms(model, attributes, 'serialize-changed', meta);
 
     model.eachTransformedAttribute((name, type) => {
       if (type === 'sheet') {
+        let { options } = meta.get(name);
+        let sheetName = options.name || name;
         let data = attributes[name]?.[1];
 
         if (Array.isArray(data)) {
-          requests.push(...this.serializeSheetUpdate(spreadsheet, name, data));
+          requests.push(...this.serializeSheetUpdate(spreadsheet, sheetName, data));
         }
 
         delete attributes[name];

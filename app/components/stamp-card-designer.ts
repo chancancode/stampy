@@ -10,7 +10,7 @@ import Store from '@ember-data/store';
 import { onError } from 'stampy/app';
 import Router from 'stampy/router';
 import { SharingOptions } from 'stampy/adapters/application';
-import StampCard from 'stampy/models/stamp-card';
+import StampCard, { Stamp } from 'stampy/models/stamp-card';
 
 function pad(value: number, length = 2): string {
   return value.toFixed(0).padStart(length, '0');
@@ -49,12 +49,6 @@ function formatDate(value?: Date): string | undefined {
   return `${year}-${month}-${day}`;
 }
 
-function timeout(amount: number): Promise<void> {
-  return new Promise(resolve => {
-    setTimeout(resolve, amount);
-  });
-}
-
 interface StampCardAttributes {
   title: string;
   description: string;
@@ -63,6 +57,7 @@ interface StampCardAttributes {
   goal: number;
   expirationDate?: Date;
   terms: readonly string[];
+  stamps: readonly Stamp[];
 }
 
 interface StampCardStub extends StampCardAttributes {
@@ -87,13 +82,14 @@ const PLACEHOLDERS: Readonly<StampCardAttributes> = Object.freeze({
     'All rights reserved.',
     'Void where prohibited.'
   ],
+  stamps: [],
   emailAddress: 'jane@example.com',
-  emailMessage: 'Hey, I shared a stamp card with you!'
+  emailMessage: 'Hey, I shared a stamp card with you!',
 });
 
 export default class StampCardDesignerComponent extends Component<StampCardDesignerArgs> {
-  @service store!: Store;
-  @service router!: Router;
+  @service declare store: Store;
+  @service declare router: Router;
 
   placeholders = PLACEHOLDERS;
 
@@ -114,12 +110,6 @@ export default class StampCardDesignerComponent extends Component<StampCardDesig
   @tracked emailMessage = '';
 
   @tracked isSubmitting = false;
-  @tracked isSubmitted = false;
-  @tracked isCanceled = false;
-
-  get isShown(): boolean {
-    return !(this.isSubmitted || this.isCanceled);
-  }
 
   constructor(owner: unknown, args: StampCardDesignerArgs) {
     super(owner, args);
@@ -214,7 +204,8 @@ export default class StampCardDesignerComponent extends Component<StampCardDesig
       foregroundColor,
       goal,
       expirationDate: expires ? expirationDate : undefined,
-      terms
+      terms,
+      stamps: []
     };
   }
 
@@ -268,18 +259,12 @@ export default class StampCardDesignerComponent extends Component<StampCardDesig
     }
 
     promise
-      .then(() => this.isSubmitted = true)
-      .then(() => timeout(500))
       .then(() => this.router.transitionTo('give'))
       .then(() => getOwner(this).lookup('route:give').refresh())
       .catch(onError)
   }
 
   @action cancel(): void {
-    this.isCanceled = true;
-
-    timeout(500)
-      .then(() => this.router.transitionTo('give'))
-      .catch(onError);
+    this.router.transitionTo('give');
   }
 }

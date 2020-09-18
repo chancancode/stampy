@@ -1,12 +1,14 @@
 import Component from '@glimmer/component';
 
 import { action } from '@ember/object';
+import { inject as service } from '@ember/service';
 
 import { softLight } from 'color-blend';
 
 import { onError } from 'stampy/app';
+import Router from 'stampy/router';
 import StampCard from 'stampy/models/stamp-card';
-import { ContextMenuItem } from 'stampy/components/context-menu';
+import { ContextMenuAction } from 'stampy/components/context-menu';
 
 interface StampCardArgs {
   card: StampCard;
@@ -15,12 +17,18 @@ interface StampCardArgs {
 
 interface Slot {
   filled: boolean;
-  items: ContextMenuItem[];
+  actions: ContextMenuAction[];
 }
 
 export default class StampCardComponent extends Component<StampCardArgs> {
+  @service declare router: Router;
+
   get card(): StampCard {
     return this.args.card;
+  }
+
+  get inert(): boolean {
+    return !!this.args.inert;
   }
 
   get size(): string {
@@ -36,44 +44,47 @@ export default class StampCardComponent extends Component<StampCardArgs> {
   get slots(): Slot[] {
     let slots: Slot[] = [];
 
+    let { inert } = this;
     let { filled: numFilled, goal, isSentFromMe, isSentToMe } = this.card;
 
     for (let i=0; i<goal; i++) {
       let filled = i < numFilled;
-      let items: ContextMenuItem[] = [];
+      let actions: ContextMenuAction[] = [];
 
-      if (isSentFromMe && filled) {
-        items.push({
-          label: 'Edit Note',
-          icon: 'note',
-          callback: () => alert('Edit Note')
-        });
+      if (!inert) {
+        if (isSentFromMe && filled) {
+          actions.push({
+            label: 'Edit Note',
+            icon: 'note',
+            callback: () => alert('Edit Note')
+          });
 
-        items.push({
-          label: 'Remove Stamp',
-          icon: 'trash',
-          dangerous: true,
-          callback: () => alert('Remove Stamp')
-        });
+          actions.push({
+            label: 'Remove Stamp',
+            icon: 'trash',
+            dangerous: true,
+            callback: () => alert('Remove Stamp')
+          });
+        }
+
+        if (isSentFromMe && !filled) {
+          actions.push({
+            label: 'Give Stamp',
+            icon: 'check',
+            callback: () => alert('Give Stamp')
+          });
+        }
+
+        if (isSentToMe && !filled) {
+          actions.push({
+            label: 'Request Stamp',
+            icon: 'bubble-check',
+            callback: () => alert('Request Stamp')
+          });
+        }
       }
 
-      if (isSentFromMe && i === numFilled) {
-        items.push({
-          label: 'Give Stamp',
-          icon: 'check',
-          callback: () => alert('Give Stamp')
-        });
-      }
-
-      if (isSentToMe && i === numFilled) {
-        items.push({
-          label: 'Request Stamp',
-          icon: 'bubble-check',
-          callback: () => alert('Request Stamp')
-        });
-      }
-
-      slots.push({ filled, items });
+      slots.push({ filled, actions });
     }
 
     return slots;
@@ -110,11 +121,34 @@ export default class StampCardComponent extends Component<StampCardArgs> {
     })`;
   }
 
-  @action delete(): void {
-    let { card } = this.args;
+  get cardActions(): ContextMenuAction[] {
+    let actions: ContextMenuAction[] = [];
 
-    if (card && confirm('Are you sure?')) {
-      card
+    if (this.card.isSentFromMe) {
+      actions.push({
+        label: 'Edit Card',
+        icon: 'edit',
+        callback: this.editCard
+      });
+
+      actions.push({
+        label: 'Delete Card',
+        icon: 'trash',
+        dangerous: true,
+        callback: this.deleteCard
+      });
+    }
+
+    return actions;
+  }
+
+  @action editCard(): void {
+    this.router.transitionTo('give.edit', this.card.id);
+  }
+
+  @action deleteCard(): void {
+    if (confirm('Are you sure?')) {
+      this.card
         .destroyRecord()
         .then(c => c.unloadRecord())
         .catch(onError);

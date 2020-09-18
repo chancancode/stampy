@@ -1,0 +1,5 @@
+{{#in-element this.container insertBefore=null}}
+  <div class="modal" {{did-insert this.willOpen}} {{will-destroy this.didClose}} ...attributes>
+    {{yield}}
+  </div>
+{{/in-element}}

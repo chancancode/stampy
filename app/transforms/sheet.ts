@@ -15,11 +15,24 @@ export type ColumnOption = [
 ];
 
 export interface SheetTransformOptions {
+  name?: string;
   columns: ColumnOption[];
 }
 
-export const sheet = (...columns: ColumnOption[]) =>
-  attr('sheet', { columns } as SheetTransformOptions as any);
+export function sheet(...columns: ColumnOption[]): ReturnType<typeof attr>;
+export function sheet(name: string, ...columns: ColumnOption[]): ReturnType<typeof attr>;
+export function sheet(...args: [maybeName: string | ColumnOption, ...columns: ColumnOption[]]): ReturnType<typeof attr>  {
+  let options: SheetTransformOptions;
+  let [maybeName, ...columns] = args;
+
+  if (typeof maybeName === 'string') {
+    options = { name: maybeName, columns };
+  } else {
+    options = { columns: [maybeName, ...columns] };
+  }
+
+  return attr('sheet', options as any);
+}
 
 type RowData = gapi.client.sheets.RowData;
 type CellData = gapi.client.sheets.CellData;
@@ -113,8 +126,6 @@ export default class SheetTransform extends Transform {
     };
 
     let rows: RowData[] = deserialized.map((row, i) => {
-      assert(`Unexpected empty row ${i}`, row.length);
-
       assert(
         `Too many columns on row ${i}, expecting up to ${columns.length}, got ${row.length}`,
         columns.length >= row.length
