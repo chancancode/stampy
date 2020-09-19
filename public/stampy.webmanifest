@@ -1,0 +1,32 @@
+{
+  "name": "Stampy",
+  "short_name": "Stampy",
+  "start_url": "https://stampy.netlify.app/",
+  "display": "standalone",
+  "description": "Send and collect rewards between friends!",
+  "icons": [{
+    "src": "/images/icons/touch-icon-120.png",
+    "sizes": "120x120",
+    "type": "image/png"
+  }, {
+    "src": "/images/icons/touch-icon-152.png",
+    "sizes": "152x152",
+    "type": "image/png"
+  }, {
+    "src": "/images/icons/touch-icon-167.png",
+    "sizes": "167x167",
+    "type": "image/png"
+  }, {
+    "src": "/images/icons/touch-icon-180.png",
+    "sizes": "180x180",
+    "type": "image/png"
+  }, {
+    "src": "/images/icons/touch-icon-512.png",
+    "sizes": "512x512",
+    "type": "image/png"
+  }, {
+    "src": "/images/icons/touch-icon-1024.png",
+    "sizes": "1024x1024",
+    "type": "image/png"
+  }]
+}
