@@ -24,6 +24,306 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 400;
 }
 
+.logo {
+  position: relative;
+  justify-self: center;
+  align-self: center;
+
+  width: 30%;
+  max-width: 180px;
+  max-height: 180px;
+
+  font-size: 0;
+  line-height: 0;
+
+  background: linear-gradient(110deg, rgba(255, 255, 255, 0.54) 10%, rgba(255, 255, 255, 0.6) 90%);
+  background-blend-mode: soft-light;
+  border-radius: 50%;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: none;
+
+  &:before {
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 0;
+    padding-bottom: 100%;
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    background: linear-gradient(180deg,
+      rgb(241, 206, 255),
+      rgb(241, 206, 255) 25%,
+
+      rgb(240, 193, 255) 25%,
+      rgb(240, 193, 255) 50%,
+
+      rgb(240, 183, 255) 50%,
+      rgb(240, 183, 255) 75%,
+
+      rgb(239, 169, 255) 75%,
+      rgb(239, 169, 255) 100%
+    );
+
+    transform: rotate(-32.8deg) scale(0.55);
+    transform-origin: center;
+  }
+
+  &.animated:after {
+    animation: loading;
+    animation-duration: 2.5s;
+    animation-fill-mode: both;
+    animation-iteration-count: infinite;
+    animation-timing-function: steps(20, jump-both);
+
+    @keyframes loading {
+      0% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 0%),
+          darken(rgb(241, 206, 255), 0%) 25%,
+
+          darken(rgb(240, 193, 255), 0%) 25%,
+          darken(rgb(240, 193, 255), 0%) 50%,
+
+          darken(rgb(240, 183, 255), 0%) 50%,
+          darken(rgb(240, 183, 255), 0%) 75%,
+
+          darken(rgb(239, 169, 255), 0%) 75%,
+          darken(rgb(239, 169, 255), 0%) 100%
+        );
+      }
+
+      25% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 0%),
+          darken(rgb(241, 206, 255), 0%) 25%,
+
+          darken(rgb(240, 193, 255), 0%) 25%,
+          darken(rgb(240, 193, 255), 0%) 50%,
+
+          darken(rgb(240, 183, 255), 0%) 50%,
+          darken(rgb(240, 183, 255), 0%) 75%,
+
+          darken(rgb(239, 169, 255), 0%) 75%,
+          darken(rgb(239, 169, 255), 0%) 100%
+        );
+      }
+
+      30% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 5%),
+          darken(rgb(241, 206, 255), 5%) 25%,
+
+          darken(rgb(240, 193, 255), 0%) 25%,
+          darken(rgb(240, 193, 255), 0%) 50%,
+
+          darken(rgb(240, 183, 255), 0%) 50%,
+          darken(rgb(240, 183, 255), 0%) 75%,
+
+          darken(rgb(239, 169, 255), 0%) 75%,
+          darken(rgb(239, 169, 255), 0%) 100%
+        );
+      }
+
+      35% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 0%),
+          darken(rgb(241, 206, 255), 0%) 25%,
+
+          darken(rgb(240, 193, 255), 5%) 25%,
+          darken(rgb(240, 193, 255), 5%) 50%,
+
+          darken(rgb(240, 183, 255), 0%) 50%,
+          darken(rgb(240, 183, 255), 0%) 75%,
+
+          darken(rgb(239, 169, 255), 0%) 75%,
+          darken(rgb(239, 169, 255), 0%) 100%
+        );
+      }
+
+      40% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 0%),
+          darken(rgb(241, 206, 255), 0%) 25%,
+
+          darken(rgb(240, 193, 255), 0%) 25%,
+          darken(rgb(240, 193, 255), 0%) 50%,
+
+          darken(rgb(240, 183, 255), 5%) 50%,
+          darken(rgb(240, 183, 255), 5%) 75%,
+
+          darken(rgb(239, 169, 255), 0%) 75%,
+          darken(rgb(239, 169, 255), 0%) 100%
+        );
+      }
+
+      45% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 0%),
+          darken(rgb(241, 206, 255), 0%) 25%,
+
+          darken(rgb(240, 193, 255), 0%) 25%,
+          darken(rgb(240, 193, 255), 0%) 50%,
+
+          darken(rgb(240, 183, 255), 0%) 50%,
+          darken(rgb(240, 183, 255), 0%) 75%,
+
+          darken(rgb(239, 169, 255), 5%) 75%,
+          darken(rgb(239, 169, 255), 5%) 100%
+        );
+      }
+
+      // ---
+
+      50% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 5%),
+          darken(rgb(241, 206, 255), 5%) 25%,
+
+          darken(rgb(240, 193, 255), 0%) 25%,
+          darken(rgb(240, 193, 255), 0%) 50%,
+
+          darken(rgb(240, 183, 255), 0%) 50%,
+          darken(rgb(240, 183, 255), 0%) 75%,
+
+          darken(rgb(239, 169, 255), 5%) 75%,
+          darken(rgb(239, 169, 255), 5%) 100%
+        );
+      }
+
+      55% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 0%),
+          darken(rgb(241, 206, 255), 0%) 25%,
+
+          darken(rgb(240, 193, 255), 5%) 25%,
+          darken(rgb(240, 193, 255), 5%) 50%,
+
+          darken(rgb(240, 183, 255), 0%) 50%,
+          darken(rgb(240, 183, 255), 0%) 75%,
+
+          darken(rgb(239, 169, 255), 5%) 75%,
+          darken(rgb(239, 169, 255), 5%) 100%
+        );
+      }
+
+      60% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 0%),
+          darken(rgb(241, 206, 255), 0%) 25%,
+
+          darken(rgb(240, 193, 255), 0%) 25%,
+          darken(rgb(240, 193, 255), 0%) 50%,
+
+          darken(rgb(240, 183, 255), 5%) 50%,
+          darken(rgb(240, 183, 255), 5%) 75%,
+
+          darken(rgb(239, 169, 255), 5%) 75%,
+          darken(rgb(239, 169, 255), 5%) 100%
+        );
+      }
+
+      // ---
+
+      65% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 5%),
+          darken(rgb(241, 206, 255), 5%) 25%,
+
+          darken(rgb(240, 193, 255), 0%) 25%,
+          darken(rgb(240, 193, 255), 0%) 50%,
+
+          darken(rgb(240, 183, 255), 5%) 50%,
+          darken(rgb(240, 183, 255), 5%) 75%,
+
+          darken(rgb(239, 169, 255), 5%) 75%,
+          darken(rgb(239, 169, 255), 5%) 100%
+        );
+      }
+
+      70% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 0%),
+          darken(rgb(241, 206, 255), 0%) 25%,
+
+          darken(rgb(240, 193, 255), 5%) 25%,
+          darken(rgb(240, 193, 255), 5%) 50%,
+
+          darken(rgb(240, 183, 255), 5%) 50%,
+          darken(rgb(240, 183, 255), 5%) 75%,
+
+          darken(rgb(239, 169, 255), 5%) 75%,
+          darken(rgb(239, 169, 255), 5%) 100%
+        );
+      }
+
+      // ---
+
+      75% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 5%),
+          darken(rgb(241, 206, 255), 5%) 25%,
+
+          darken(rgb(240, 193, 255), 5%) 25%,
+          darken(rgb(240, 193, 255), 5%) 50%,
+
+          darken(rgb(240, 183, 255), 5%) 50%,
+          darken(rgb(240, 183, 255), 5%) 75%,
+
+          darken(rgb(239, 169, 255), 5%) 75%,
+          darken(rgb(239, 169, 255), 5%) 100%
+        );
+      }
+
+      100% {
+        background: linear-gradient(180deg,
+          darken(rgb(241, 206, 255), 5%),
+          darken(rgb(241, 206, 255), 5%) 25%,
+
+          darken(rgb(240, 193, 255), 5%) 25%,
+          darken(rgb(240, 193, 255), 5%) 50%,
+
+          darken(rgb(240, 183, 255), 5%) 50%,
+          darken(rgb(240, 183, 255), 5%) 75%,
+
+          darken(rgb(239, 169, 255), 5%) 75%,
+          darken(rgb(239, 169, 255), 5%) 100%
+        );
+      }
+    }
+  }
+
+  svg.icon {
+    position: absolute;
+    z-index: 2;
+    margin: 5%;
+    width: 90%;
+    height: 90%;
+    fill: white;
+  }
+
+  svg.text {
+    position: absolute;
+    z-index: 2;
+    fill: rgba(255, 255, 255, 0.5);
+    width: 80%;
+    font-size: 20px;
+    top: 120%;
+    left: 10%;
+  }
+}
+
 #app {
   position: absolute;
   width: 100%;
@@ -34,7 +334,7 @@ h1, h2, h3, h4, h5, h6 {
   display: grid;
   grid-template-rows: 1fr 75px;
 
-  background: linear-gradient(180deg, rgba(42,2,48,1) 0%, rgba(85,35,93,1) 60%, rgba(143,19,194,1) 100%);
+  background: linear-gradient(110deg, rgb(185, 64, 229) 30%, rgb(158, 26, 208) 70%);
   border-radius: 4px;
 
   transform-origin: top;
@@ -141,7 +441,6 @@ nav {
 
         svg {
           fill: rgb(175, 30, 230);
-          animation-iteration-count: 1;
         }
       }
 
@@ -281,6 +580,8 @@ main {
   position: relative;
   padding: 16px;
   border-radius: 5px;
+  box-sizing: border-box;
+  min-width: 280px;
   max-width: 380px;
   justify-self: center;
 
@@ -835,6 +1136,11 @@ a.placeholder-card {
   }
 }
 
+.splash-screen {
+  background: linear-gradient(110deg, rgb(185, 64, 229) 30%, rgb(158, 26, 208) 70%);
+  border-radius: 4px;
+}
+
 .signin-modal, .error-modal .modal-content {
   display: grid;
   justify-content: left;
@@ -900,7 +1206,6 @@ a.placeholder-card {
   }
 
   textarea {
-    margin: 0px;
     grid-row: 5 / -2;
     align-self: stretch;
     height: 100%;
@@ -913,5 +1218,10 @@ a.placeholder-card {
     padding: 0px;
     border: none;
     outline: none;
+
+    font-family: monospace;
+    line-height: 1;
+    color: black;
+    font-size: 0.9em;
   }
 }

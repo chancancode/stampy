@@ -1,19 +1,16 @@
 import DS from 'ember-data';
 import Model, { attr, hasMany } from '@ember-data/model';
 import { action } from '@ember/object';
+import { tracked } from '@glimmer/tracking';
 import StampCard from './stamp-card';
 
 export default class User extends Model {
-  @attr() name!: string;
-  @attr() email!: string;
-  @attr() picture?: string;
+  @attr() declare name: string;
+  @attr() declare email: string;
+  @attr() declare picture: string;
 
-  @hasMany('stamp-card', { inverse: 'from' }) sent!: DS.PromiseManyArray<StampCard>;
-  @hasMany('stamp-card', { inverse: 'to' }) received!: DS.PromiseManyArray<StampCard>;
-
-  peekHasMany(key: 'sent' | 'received'): DS.ManyArray<StampCard> | null {
-    return this.hasMany(key as any).value();
-  }
+  @hasMany('stamp-card', { inverse: 'from' }) declare sent: DS.PromiseManyArray<StampCard>;
+  @hasMany('stamp-card', { inverse: 'to' }) declare received: DS.PromiseManyArray<StampCard>;
 
   get redeemable(): StampCard[] {
     return this.received.filterBy('isLoaded').filterBy('isComplete');
@@ -31,12 +28,27 @@ export default class User extends Model {
     return this.get('isLoading') || this.get('isReloading');
   }
 
+  @tracked hasLoadedSent = false;
+  @tracked hasLoadedReceived = false;
+
+  get hasLoadedRedeemable(): boolean {
+    return this.hasLoadedReceived;
+  }
+
+  get hasLoadedCollectable(): boolean {
+    return this.hasLoadedReceived;
+  }
+
+  get hasLoadedGifted(): boolean {
+    return this.hasLoadedSent;
+  }
+
   get isRefreshingSent(): boolean {
-    return this.isRefreshing || !this.peekHasMany('sent')?.get('isLoaded');
+    return this.isRefreshing || !this.hasLoadedSent || this.sent.get('isPending');
   }
 
   get isRefreshingReceived(): boolean {
-    return this.isRefreshing || !this.peekHasMany('received')?.get('isLoaded');
+    return this.isRefreshing || !this.hasLoadedReceived || this.received.get('isPending');
   }
 
   get isRefreshingRedeemable(): boolean {
@@ -56,7 +68,10 @@ export default class User extends Model {
       await this.reload();
     }
 
-    return (await this.sent).toArray();
+    let result = await this.sent;
+    this.hasLoadedSent = true;
+
+    return result.toArray();
   }
 
   @action async refreshReceived(): Promise<StampCard[]> {
@@ -64,7 +79,10 @@ export default class User extends Model {
       await this.reload();
     }
 
-    return (await this.received).toArray();
+    let result = await this.received;
+    this.hasLoadedReceived = true;
+
+    return result.toArray();
   }
 
   @action async refreshRedeemable(): Promise<StampCard[]> {

@@ -34,6 +34,7 @@ export default class SessionService extends Service {
   }
 
   async signIn(): Promise<User> {
+    this.currentUserDidChange(this.auth.currentUser.get());
     return this.signInPromise;
   }
 
@@ -70,11 +71,17 @@ export default class SessionService extends Service {
   @action private currentUserDidChange(user: GoogleUser): void {
     if (!this.isDestroying) {
       if (user.isSignedIn()) {
-        let profile = this.profile = user.getBasicProfile();
-        this.store.findRecord('user', profile.getEmail()).then(
-          this.didSignIn,
-          Ember.onerror
-        );
+        let profile = user.getBasicProfile();
+
+        if (profile !== this.profile) {
+          this.profile = profile;
+          this.currentUser = null;
+
+          this.store.findRecord('user', profile.getEmail()).then(
+            this.didSignIn,
+            Ember.onerror
+          );
+        }
       } else {
         this.profile = null;
         this.currentUser = null;

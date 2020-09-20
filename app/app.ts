@@ -22,10 +22,12 @@ export function onError(error: unknown): void {
       return;
     }
 
-    details = error.name || 'Error';
-
-    if (error.message) {
-      details = `${details}: ${error.message}`;
+    if (error.name && error.message) {
+      details = `${error.name}: ${error.message}`;
+    } else if (error.name || error.message) {
+      details = error.name || error.message;
+    } else {
+      details = 'Unknown Error';
     }
 
     if (error.stack) {
@@ -36,15 +38,15 @@ export function onError(error: unknown): void {
       }
     }
   } else if (isResponse(error)) {
-    let status = '';
-
     if (error.status && error.statusText) {
-      status = `${error.status} ${error.statusText}\n\n`;
+      details = `Error Response ${error.status} ${error.statusText}\n\n`;
     } else if (error.status || error.statusText) {
-      status = `${error.status || error.statusText}\n\n`;
+      details = `Error Response ${error.status || error.statusText}\n\n`;
+    } else {
+      details = 'Unknwon Error Response';
     }
 
-    details = `${status}${error.body}`;
+    details = `${details}${error.body}`;
   } else {
     try {
       details = JSON.stringify(error, null, 2);
@@ -60,7 +62,27 @@ export function onError(error: unknown): void {
   let errorDetails = document.getElementById('error-details') as HTMLTextAreaElement | null;
 
   if (errorDetails) {
-    errorDetails.value = details;
+    errorDetails.value = details.trim();
+  }
+
+  let issueBody = document.getElementById('issue-body') as HTMLInputElement | null;
+
+  if (issueBody) {
+    issueBody.value = '';
+
+    try {
+      issueBody.value += ('### URL\n\n```\n' + window.location.href + '\n```\n\n');
+    } catch {
+      // ignore
+    }
+
+    try {
+      issueBody.value += ('### User Agent\n\n```\n' + window.navigator.userAgent + '\n```\n\n');
+    } catch {
+      // ignore
+    }
+
+    issueBody.value += ('### Error Details\n\n```\n' + details.trim() + '\n```');
   }
 
   const errorModal = document.getElementById('error-modal');

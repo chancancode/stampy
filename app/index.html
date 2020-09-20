@@ -14,11 +14,23 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/touch-icon-180.png">
     <link rel="apple-touch-icon" sizes="512x512" href="/icons/touch-icon-512.png">
     <link rel="apple-touch-icon" sizes="1024x1024" href="/icons/touch-icon-1024.png">
+
+    <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" href="/launch/launch-640x1136.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/launch/launch-750x1334.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="/launch/launch-1125x2436.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" href="/launch/launch-1242x2208.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" href="/launch/launch-1536x2048.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)" href="/launch/launch-1668x2224.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" href="/launch/launch-2048x2732.png">
+
     <link rel="manifest" href="/stampy.webmanifest">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Stampy">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <script src="{{rootURL}}assets/vendor.js" defer></script>
+    <script src="{{rootURL}}assets/stampy.js" defer></script>
 
     <script>
       window.scripts = Object.create(null);
@@ -51,9 +63,6 @@
   <body>
     {{content-for "body"}}
 
-    <script src="{{rootURL}}assets/vendor.js"></script>
-    <script src="{{rootURL}}assets/stampy.js"></script>
-
     {{content-for "body-footer"}}
 
     <svg style="display: none;" width="0" height="0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -73,14 +82,16 @@
     </svg>
 
     <div id="error-modal" class="modal error-modal" style="display: none">
-      <form class="modal-dialog">
+      <form class="modal-dialog" method="GET" action="https://github.com/chancancode/stampy/issues/new" target="_blank">
         <h1>Error</h1>
         <div class="modal-content">
           <h1>Oops...</h1>
           <h2>Something went wrong, please report the following error.</h2>
-          <textarea id="error-details" onfocus="this.select()" readonly></textarea>
+          <textarea id="error-details" wrap="off" onclick="this.select()" onfocus="this.select()" readonly></textarea>
         </div>
-        <button type="submit">Reload</button>
+        <input type="hidden" id="issue-body" name="body" value="">
+        <button type="submit">Report</button>
+        <button type="button" onclick="window.location.reload()">Reload</button>
       </form>
     </div>
   </body>
